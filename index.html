@@ -1,0 +1,2700 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hitachi HMMS — Marketing Latam Dashboard (sin SQL/MQL)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Skip artifact shell — fixed styles served beside every artifact.
+   Tokens, utilities and components (basecoat 1.0 markup, no CDN); artifacts
+   override --accent for their own identity. */
+:root {
+  color-scheme: light dark;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --accent-text: color-mix(in srgb, var(--accent) 72%, #000);
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --text: #14171f;
+  --text-muted: #5b6472;
+  --border: rgba(20, 23, 31, 0.10);
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(20, 23, 31, 0.08);
+  --space: 16px;
+  --success: #0a7a35;
+  --danger: #c0262d;
+  --warning: #8a5300;
+}
+/* Theme resolution. Without data-theme the viewer's system preference decides,
+   as it always did. With it, the artifact's own choice wins in BOTH directions:
+   a page that hardcodes one palette must not be handed the opposite set of
+   tokens by the machine it happens to be opened on. The dark values appear
+   twice because a media query cannot be folded into a selector list.
+   The attribute sits inside :where() so these blocks keep the specificity of a
+   bare :root — the page's own <style> is linked after this file and must go on
+   overriding any token it wants, exactly as it could before. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+    --bg: #101318;
+    --surface: #181c23;
+    --text: #eef1f6;
+    --text-muted: #9aa4b2;
+    --border: rgba(238, 241, 246, 0.12);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --success: #4ade80;
+    --danger: #f87171;
+    --warning: #fbbf24;
+  }
+}
+:root:where([data-theme="dark"]) {
+  color-scheme: dark;
+  --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+  --bg: #101318;
+  --surface: #181c23;
+  --text: #eef1f6;
+  --text-muted: #9aa4b2;
+  --border: rgba(238, 241, 246, 0.12);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --success: #4ade80;
+  --danger: #f87171;
+  --warning: #fbbf24;
+}
+:root:where([data-theme="light"]) { color-scheme: light; }
+/* Pages generated before the shell had its own components still link the
+   basecoat CDN, which reads its own tokens and switches theme only on a
+   .dark class. Bridged to the shell's, whatever of it those pages use takes
+   the page's accent and follows the declared theme. Its --accent token is a
+   hover tint, renamed in its theme as --color-accent; the shell's --accent is
+   the brand colour, so the tint is derived from it here. */
+:root {
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-contrast);
+  --secondary: color-mix(in srgb, var(--text) 7%, var(--surface));
+  --secondary-foreground: var(--text);
+  --muted: color-mix(in srgb, var(--text) 5%, var(--surface));
+  --muted-foreground: var(--text-muted);
+  --color-accent: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --color-accent-foreground: var(--text);
+  --destructive: var(--danger);
+  --input: var(--border);
+  --ring: var(--accent);
+}
+* { box-sizing: border-box; }
+/* The reset the pages were written against: they all linked basecoat, which
+   ships Tailwind's. Its components now live here, so the reset does too. */
+*, ::before, ::after, ::backdrop { margin: 0; padding: 0; border: 0 solid; }
+/* Preflight's rule too: without it a component class that sets display
+   (.alert, .card, .btn…) beats the hidden attribute and shows the element. */
+[hidden]:where(:not([hidden="until-found"])) { display: none !important; }
+.hidden { display: none !important; }
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+a { color: inherit; text-decoration: inherit; }
+b, strong { font-weight: bolder; }
+ol, ul, menu { list-style: none; }
+svg, video, canvas, iframe { display: block; vertical-align: middle; }
+button, input, select, textarea { color: inherit; background-color: transparent; border-radius: 0; }
+table { border-collapse: collapse; }
+hr { height: 0; color: inherit; border-top-width: 1px; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+
+.shell-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.shell-section { padding: calc(var(--space) * 2) 0; }
+.shell-grid { display: grid; gap: var(--space); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.shell-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: var(--space); }
+.shell-footer { padding: 24px 0 40px; color: var(--text-muted); font-size: 13px; }
+
+.shell-hero { padding: calc(var(--space) * 3) 0 calc(var(--space) * 2); }
+.shell-hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+.shell-hero p { color: var(--text-muted); max-width: 60ch; margin: 0; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space);
+}
+
+.kpi { display: flex; flex-direction: column; gap: 4px; }
+.kpi .kpi-value { font-size: clamp(22px, 2.3vw, 28px); font-weight: 650; line-height: 1.1; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.kpi .kpi-label { font-size: 13px; color: var(--text-muted); }
+.kpi .kpi-delta { font-size: 12.5px; font-weight: 600; }
+.kpi .kpi-delta.up { color: var(--success); }
+.kpi .kpi-delta.down { color: var(--danger); }
+
+table.shell-table { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.shell-table th {
+  text-align: left; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 600;
+}
+table.shell-table th, table.shell-table td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); }
+table.shell-table td.num, table.shell-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+.chart-box { width: 100%; min-height: 220px; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+.chart-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: 12px; font-size: 12.5px; color: var(--text-muted); }
+.chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chart-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.chart-legend b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.muted { color: var(--text-muted); }
+.accent { color: var(--accent-text); }
+.shell-badge, .eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-text);
+}
+/* A pill keeps its content width inside flex and grid columns, which would
+   otherwise stretch it across the card; a centred parent still centres it. */
+.shell-badge, .eyebrow, .badge { width: fit-content; max-width: 100%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .shell-fade { animation: shell-fade 400ms ease both; }
+  @keyframes shell-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+/* Layout and type utilities: what the pages kept spelling in style="".
+   Spacing and type sizes follow Tailwind's scale; there is no Tailwind. */
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.stack { display: flex; flex-direction: column; gap: var(--space); }
+.between { justify-content: space-between; }
+.grow { flex: 1 1 0; min-width: 0; }
+.cols-2, .cols-3, .cols-4, .cols-5 { display: grid; gap: var(--space); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 720px) {
+  .cols-2, .cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cols-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1000px) { .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.gap-1 { gap: 4px; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; } .gap-6 { gap: 24px; }
+.m-0 { margin: 0; }
+.mt-1 { margin-top: 4px; } .mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; } .mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; }
+.mb-1 { margin-bottom: 4px; } .mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; } .mb-4 { margin-bottom: 16px; } .mb-6 { margin-bottom: 24px; }
+.p-2 { padding: 8px; } .p-3 { padding: 12px; } .p-4 { padding: 16px; } .p-6 { padding: 24px; }
+.text-xs { font-size: 12px; } .text-sm { font-size: 14px; } .text-base { font-size: 16px; }
+.text-lg { font-size: 18px; } .text-xl { font-size: 20px; line-height: 1.35; }
+.text-2xl { font-size: 24px; line-height: 1.25; } .text-3xl { font-size: 30px; line-height: 1.2; }
+.font-medium { font-weight: 500; } .font-semibold { font-weight: 600; } .font-bold { font-weight: 700; }
+.text-right { text-align: right; } .text-center { text-align: center; }
+.nowrap { white-space: nowrap; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+.w-full { width: 100%; }
+.text-success { color: var(--success); } .text-danger { color: var(--danger); } .text-warning { color: var(--warning); }
+
+/* Components, with basecoat 1.0 markup (variants and sizes are data
+   attributes) and the shell tokens, so a page needs neither component CSS
+   nor a CSS framework. An older page that also links basecoat gets these
+   rules after it, over the same properties. */
+button, input, select, textarea { font: inherit; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 14px; border: 1px solid transparent; border-radius: calc(var(--radius) - 2px);
+  background: var(--accent); color: var(--accent-contrast);
+  font-size: 14px; font-weight: 500; line-height: 1; white-space: nowrap; text-decoration: none; cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.btn:hover { background: color-mix(in srgb, var(--accent) 86%, #000); }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.btn[data-variant="secondary"] { background: color-mix(in srgb, var(--text) 8%, var(--surface)); color: var(--text); }
+.btn[data-variant="secondary"]:hover { background: color-mix(in srgb, var(--text) 14%, var(--surface)); }
+.btn[data-variant="outline"] { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn[data-variant="ghost"] { background: transparent; color: var(--text); }
+.btn[data-variant="outline"]:hover, .btn[data-variant="ghost"]:hover { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.btn[data-variant="destructive"] { background: var(--danger); color: var(--bg); }
+.btn[data-variant="destructive"]:hover { background: color-mix(in srgb, var(--danger) 86%, var(--text)); }
+.btn[data-variant="link"] { height: auto; padding: 0; background: none; color: var(--accent-text); text-decoration: underline; text-underline-offset: 3px; }
+.btn[data-size="sm"] { height: 30px; padding: 0 10px; font-size: 13px; }
+.btn[data-size="lg"] { height: 42px; padding: 0 20px; font-size: 15px; }
+.btn[data-size="icon"] { width: 36px; padding: 0; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  border: 1px solid transparent; border-radius: 999px; background: var(--accent); color: var(--accent-contrast);
+  font-size: 12px; font-weight: 600; line-height: 1.5; white-space: nowrap;
+}
+.badge[data-variant="secondary"] { background: color-mix(in srgb, var(--text) 8%, var(--surface)); color: var(--text); }
+.badge[data-variant="outline"] { background: transparent; color: var(--text); border-color: var(--border); }
+.badge[data-variant="destructive"] { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); color: var(--danger); }
+
+.alert {
+  display: grid; gap: 4px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); font-size: 14px;
+}
+.alert h2, .alert h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.alert p, .alert section { margin: 0; color: var(--text-muted); }
+.alert[data-variant="destructive"] { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); background: color-mix(in srgb, var(--danger) 7%, var(--surface)); color: var(--danger); }
+
+.card {
+  display: flex; flex-direction: column; gap: 16px; padding: 20px 0;
+  border: 1px solid var(--border); border-radius: calc(var(--radius) + 2px);
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow);
+}
+.card > header, .card > section, .card > footer { padding: 0 20px; }
+.card > header { display: grid; gap: 4px; }
+.card > header h2, .card > header h3 { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.3; }
+.card > header p { margin: 0; color: var(--text-muted); font-size: 14px; }
+.card > footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.input {
+  width: 100%; min-height: 36px; padding: 6px 12px; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
+  background: var(--surface); color: var(--text); font-size: 14px;
+}
+textarea.input { min-height: 84px; resize: vertical; }
+.input::placeholder { color: var(--text-muted); }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 14px; font-weight: 500; }
+.field [role="alert"] { color: var(--danger); font-size: 13px; }
+
+dialog.dialog {
+  width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; padding: 0;
+  border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px);
+  background: var(--surface); color: var(--text); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+dialog.dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+dialog.dialog > div { display: grid; gap: 16px; padding: 24px; }
+dialog.dialog header { display: grid; gap: 4px; }
+dialog.dialog header h2 { margin: 0; font-size: 18px; font-weight: 600; }
+dialog.dialog header p { margin: 0; color: var(--text-muted); font-size: 14px; }
+dialog.dialog footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+.tabs { display: grid; gap: 12px; }
+.tabs > [role="tablist"] {
+  display: inline-flex; gap: 4px; width: fit-content; max-width: 100%; padding: 4px; overflow-x: auto;
+  border-radius: var(--radius); background: color-mix(in srgb, var(--text) 6%, var(--surface));
+}
+.tabs [role="tab"] {
+  padding: 6px 12px; border: 0; border-radius: calc(var(--radius) - 4px); background: transparent;
+  color: var(--text-muted); font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer;
+}
+.tabs [role="tab"][aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.tabs [role="tabpanel"][hidden] { display: none; }
+
+.accordion > details { border-bottom: 1px solid var(--border); }
+.accordion > details > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 0; font-weight: 500; list-style: none; cursor: pointer;
+}
+.accordion > details > summary::-webkit-details-marker { display: none; }
+.accordion > details > summary::after { content: "+"; color: var(--text-muted); font-size: 18px; line-height: 1; }
+.accordion > details[open] > summary::after { content: "\2212"; }
+.accordion > details > :not(summary) { margin: 0 0 14px; color: var(--text-muted); }
+
+.toaster {
+  position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; flex-direction: column-reverse; gap: 8px;
+  width: min(360px, calc(100vw - 32px)); pointer-events: none;
+}
+.toaster .toast { pointer-events: auto; transition: opacity 200ms ease, transform 200ms ease; }
+.toaster .toast[aria-hidden="true"] { opacity: 0; transform: translateY(8px); }
+.toaster .toast-content {
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); font-size: 13px;
+}
+.toaster .toast-content h2 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
+.toaster .toast-content p { margin: 0; color: var(--text-muted); }
+
+/* skipUI building blocks. */
+.skip-table-search { max-width: 320px; margin-bottom: 12px; }
+.skip-table-wrap { overflow-x: auto; }
+table.shell-table th[data-sort] { cursor: pointer; user-select: none; }
+table.shell-table th[aria-sort="ascending"]::after { content: " \25B2"; font-size: 9px; }
+table.shell-table th[aria-sort="descending"]::after { content: " \25BC"; font-size: 9px; }
+table.shell-table td.skip-table-empty { color: var(--text-muted); text-align: center; padding: 24px 0; }
+.skip-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; font-size: 13px; color: var(--text-muted); }
+.toaster .toast[data-type="success"] .toast-content { border-left: 3px solid var(--success); }
+.toaster .toast[data-type="error"] .toast-content { border-left: 3px solid var(--danger); }
+
+</style>
+<script>
+/* Skip artifact shell — fixed helpers served beside every artifact. */
+(function () {
+  "use strict";
+
+  var fmt = {
+    num: function (v, opts) { return new Intl.NumberFormat("pt-BR", opts || {}).format(v); },
+    brl: function (v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); },
+    pct: function (v) { return new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 }).format(v); },
+    compact: function (v) { return new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(v); },
+    brlCompact: function (v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(v); }
+  };
+
+  // axisLabels formats the five y-axis ticks in the unit the chart declared
+  // (percent, BRL or plain numbers), compact so long values never clip, with
+  // the fewest decimals that still print every tick exactly (1,5 mi, not 2 mi).
+  function axisLabels(format, ticks) {
+    function at(digits) {
+      var opts = { notation: "compact", maximumFractionDigits: digits };
+      if (format === "pct") opts = { style: "percent", maximumFractionDigits: digits };
+      else if (format === "brl") opts = { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: digits };
+      var nf = new Intl.NumberFormat("pt-BR", opts);
+      return ticks.map(function (t) { return nf.format(t); });
+    }
+    for (var digits = 0; digits < 2; digits++) {
+      if (at(digits).join("|") === at(digits + 1).join("|")) return at(digits);
+    }
+    return at(2);
+  }
+
+  // yAxisPad formats the ticks and measures the left padding they need from
+  // the longest one; drawYAxis then draws the grid and the labels.
+  function yAxisPad(format, max) {
+    var labels = axisLabels(format, [0, max / 4, max / 2, (max * 3) / 4, max]);
+    var longest = labels.reduce(function (m, l) { return Math.max(m, l.length); }, 0);
+    return { labels: labels, padL: Math.max(40, Math.round(longest * 6.2) + 14) };
+  }
+  function drawYAxis(svg, axis, W, padR, padT, plotH) {
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: axis.padL, y1: gy, x2: W - padR, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: axis.padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axis.labels[g];
+      svg.appendChild(lbl);
+    }
+  }
+
+  // xLabelStep: show every k-th category label so labels never overlap, and
+  // always the last one (counted back from the end).
+  function xLabelStep(labels, step) {
+    var longest = labels.reduce(function (m, l) { return Math.max(m, String(l).length); }, 0);
+    return Math.max(1, Math.ceil((longest * 6.4 + 8) / Math.max(step, 1)));
+  }
+  function drawXLabel(svg, text, x, y, W, edgeGuard) {
+    var anchor = "middle";
+    var half = String(text).length * 3.2;
+    if (edgeGuard && x - half < 4) anchor = "start";
+    if (edgeGuard && x + half > W - 4) anchor = "end";
+    var tx = svgEl("text", { x: x, y: y, "text-anchor": anchor, "font-size": 11, fill: mutedColor() });
+    tx.textContent = text;
+    svg.appendChild(tx);
+  }
+  // categoryLines fits a bar's category name in its slot: one line, two lines
+  // split at a space, or cut with "…". A bar without its name can't be read, so
+  // categories are never skipped; null when the slot is too narrow for that.
+  function categoryLines(text, slot) {
+    var fit = Math.floor((slot - 6) / 6.4);
+    var s = String(text);
+    if (fit < 4) return null;
+    if (s.length <= fit) return [s];
+    var cut = function (t) { return t.length <= fit ? t : t.slice(0, fit - 1).trimEnd() + "…"; };
+    var best = -1;
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] === " " && (best < 0 || Math.abs(s.length / 2 - i) < Math.abs(s.length / 2 - best))) best = i;
+    }
+    if (best < 0) return [cut(s)];
+    return [cut(s.slice(0, best)), cut(s.slice(best + 1))];
+  }
+  function legend(el, items) {
+    var box = document.createElement("div");
+    box.className = "chart-legend";
+    items.forEach(function (it) {
+      var row = document.createElement("span");
+      var dot = document.createElement("i");
+      dot.style.background = it.color;
+      row.appendChild(dot);
+      row.appendChild(document.createTextNode((it.label || "") + (it.value ? " " : "")));
+      if (it.value) {
+        var v = document.createElement("b");
+        v.textContent = it.value;
+        row.appendChild(v);
+      }
+      box.appendChild(row);
+    });
+    resolve(el).appendChild(box);
+  }
+  var seriesPalette = ["#1baf7a", "#eda100", "#e34948", "#4a3aa7", "#e87ba4", "#0ea5b7"];
+
+  // format accepts a function OR one of the fmt names ("num" | "brl" | "pct").
+  // A page's function may return nothing or throw: the chart prints its
+  // number instead of taking the rest of the page script down with it.
+  function coerceFormat(spec) {
+    if (typeof spec === "function") {
+      return function (v) {
+        try {
+          var out = spec(v);
+          return out == null ? "" : String(out);
+        } catch (e) {
+          return fmt.num(v);
+        }
+      };
+    }
+    if (typeof spec === "string" && fmt[spec]) return fmt[spec];
+    return function (v) { return fmt.num(v); };
+  }
+
+  function accent() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2563eb";
+  }
+  function mutedColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#5b6472";
+  }
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function frame(el, w, h) {
+    var svg = svgEl("svg", { viewBox: "0 0 " + w + " " + h, role: "img" });
+    el = resolve(el);
+    el.innerHTML = "";
+    el.appendChild(svg);
+    return svg;
+  }
+
+  // maxOf guards the axis scale: empty values would give -Infinity (truthy,
+  // so "|| 1" can't catch it) and a non-positive max would flip the chart.
+  // finite reads a chart value as a number, 0 when it is not one (NaN,
+  // Infinity, a stray string), so one bad value cannot blank the axis.
+  function finite(v) {
+    var n = +v;
+    return isFinite(n) ? n : 0;
+  }
+
+  function maxOf(values) {
+    var m = values.length ? Math.max.apply(null, values.map(finite)) : 0;
+    return m > 0 ? m : 1;
+  }
+
+  // labelsFor pads or trims the category names to the n points drawn: pages
+  // pass labels and values of different lengths, and one throw here loses
+  // every section the page renders after the chart.
+  function labelsFor(cfg, n) {
+    var out = [];
+    for (var i = 0; i < n; i++) out.push(cfg.labels && cfg.labels[i] != null ? String(cfg.labels[i]) : "");
+    return out;
+  }
+
+  // niceMax rounds the scale up so the four grid steps land on round values
+  // (1, 1.5, 2, 2.5, 3, 4, 5, 6 or 8 × 10^k) and the tick labels read exactly.
+  function niceMax(max) {
+    var raw = max / 4;
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var res = raw / mag;
+    var steps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+    var nice = steps.filter(function (s) { return s >= res - 1e-9; })[0];
+    return nice * mag * 4;
+  }
+
+  // bar(el, {labels:[], values:[], color?, format?}) — vertical bar chart.
+  function bar(el, cfg) {
+    var W = 640, H = 280, padB = 30, padT = 12, padR = 12;
+    var max = niceMax(maxOf(cfg.values));
+    var axis = yAxisPad(cfg.format, max);
+    var svg = frame(el, W, H);
+    var n = cfg.values.length;
+    var labels = labelsFor(cfg, n);
+    var plotW = W - axis.padL - padR;
+    var step = plotW / n, bw = Math.min(step * 0.62, 64);
+    var names = labels.map(function (l) { return categoryLines(l, step); });
+    var named = names.every(Boolean);
+    if (named && names.some(function (l) { return l.length > 1; })) padB = 42;
+    var plotH = H - padT - padB;
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    var every = xLabelStep(labels, step);
+    drawYAxis(svg, axis, W, padR, padT, plotH);
+    cfg.values.forEach(function (v, i) {
+      var bh = Math.max(0, (finite(v) / max) * plotH);
+      var x = axis.padL + i * step + (step - bw) / 2;
+      var y = padT + plotH - bh;
+      var r = svgEl("rect", { x: x, y: y, width: bw, height: bh, rx: 4, fill: (cfg.colors && cfg.colors[i]) || color });
+      var t = svgEl("title", {});
+      t.textContent = labels[i] + ": " + f(v);
+      r.appendChild(t);
+      svg.appendChild(r);
+      if (named) {
+        names[i].forEach(function (text, li) {
+          drawXLabel(svg, text, x + bw / 2, padT + plotH + 18 + li * 13, W, false);
+        });
+      } else if ((n - 1 - i) % every === 0) {
+        drawXLabel(svg, labels[i], x + bw / 2, H - 10, W, false);
+      }
+    });
+  }
+
+  // line(el, {labels:[], values:[] | series:[{label, values, color?}], color?, format?})
+  // — one line, or several series on one scale with a legend under the chart.
+  function line(el, cfg) {
+    var W = 640, H = 280, padB = 30, padT = 12, padR = 16;
+    var series = cfg.series && cfg.series.length
+      ? cfg.series
+      : [{ label: "", values: cfg.values || [], color: cfg.color }];
+    var all = [];
+    series.forEach(function (s) { all = all.concat(s.values || []); });
+    var max = niceMax(maxOf(all));
+    var axis = yAxisPad(cfg.format, max);
+    var svg = frame(el, W, H);
+    var n = series.reduce(function (m, s) { return Math.max(m, (s.values || []).length); }, 0);
+    var labels = labelsFor(cfg, n);
+    var plotW = W - axis.padL - padR, plotH = H - padT - padB;
+    var f = coerceFormat(cfg.format);
+    drawYAxis(svg, axis, W, padR, padT, plotH);
+    var xs = labels.map(function (_, i) { return axis.padL + (n === 1 ? plotW / 2 : (plotW * i) / (n - 1)); });
+    var every = xLabelStep(labels, n > 1 ? plotW / (n - 1) : plotW);
+    labels.forEach(function (label, i) {
+      if ((n - 1 - i) % every === 0) drawXLabel(svg, label, xs[i], H - 10, W, true);
+    });
+    var colors = series.map(function (s, si) {
+      return s.color || (si === 0 ? (cfg.color || accent()) : seriesPalette[(si - 1) % seriesPalette.length]);
+    });
+    series.forEach(function (s, si) {
+      var color = colors[si];
+      var pts = (s.values || []).map(function (v, i) { return [xs[i], padT + plotH - (finite(v) / max) * plotH]; });
+      var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+      svg.appendChild(svgEl("path", { d: d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
+      pts.forEach(function (p, i) {
+        var c = svgEl("circle", { cx: p[0], cy: p[1], r: 3.5, fill: color });
+        var t = svgEl("title", {});
+        t.textContent = (s.label ? s.label + " · " : "") + labels[i] + ": " + f(s.values[i]);
+        c.appendChild(t);
+        svg.appendChild(c);
+      });
+    });
+    if (series.length > 1) {
+      legend(el, series.map(function (s, si) { return { label: s.label, color: colors[si] }; }));
+    }
+  }
+
+  // donut(el, {labels:[], values:[], colors?, format?, center?, centerLabel?, legend?})
+  // — donut with a short total in the centre (compact, in the declared unit)
+  // and, with legend: true, the labels and shares listed under it.
+  function donut(el, cfg) {
+    var W = 320, H = 280, cx = W / 2, cy = H / 2, R = 92, r = 58;
+    var svg = frame(el, W, H);
+    // At 100% of a wide container the donut outgrows the height pages give
+    // the box and spills over the next section: keep it at its own size.
+    svg.style.maxWidth = W + "px";
+    svg.style.margin = "0 auto";
+    var values = cfg.values.map(finite);
+    var labels = labelsFor(cfg, values.length);
+    var sum = values.reduce(function (a, b) { return a + b; }, 0);
+    var total = sum || 1;
+    var palette = cfg.colors || [accent()].concat(seriesPalette);
+    // The hover keeps the full value; the centre has room for a short one.
+    var full = coerceFormat(cfg.format);
+    var short = typeof cfg.format === "function" ? full : cfg.format === "brl" ? fmt.brlCompact : fmt.compact;
+    var a0 = -Math.PI / 2;
+    values.forEach(function (v, i) {
+      var a1 = a0 + (v / total) * Math.PI * 2;
+      var large = a1 - a0 > Math.PI ? 1 : 0;
+      var p = ["M", cx + R * Math.cos(a0), cy + R * Math.sin(a0),
+        "A", R, R, 0, large, 1, cx + R * Math.cos(a1), cy + R * Math.sin(a1),
+        "L", cx + r * Math.cos(a1), cy + r * Math.sin(a1),
+        "A", r, r, 0, large, 0, cx + r * Math.cos(a0), cy + r * Math.sin(a0), "Z"].join(" ");
+      var path = svgEl("path", { d: p, fill: palette[i % palette.length] });
+      var t = svgEl("title", {});
+      t.textContent = labels[i] + ": " + full(v) + " (" + fmt.pct(v / total) + ")";
+      path.appendChild(t);
+      svg.appendChild(path);
+      a0 = a1;
+    });
+    // A share chart has no total worth printing: without its own centre text
+    // the caption alone takes the middle.
+    var text = cfg.center != null ? String(cfg.center) : (cfg.format === "pct" ? "" : short(sum));
+    if (text) {
+      var size = text.length > 9 ? 14 : text.length > 7 ? 17 : 20;
+      var center = svgEl("text", { x: cx, y: cfg.centerLabel ? cy + 1 : cy + 6, "text-anchor": "middle", "font-size": size, "font-weight": 650, fill: "currentColor" });
+      center.textContent = text;
+      svg.appendChild(center);
+    }
+    if (cfg.centerLabel) {
+      var cap = svgEl("text", { x: cx, y: text ? cy + 19 : cy + 5, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      cap.textContent = cfg.centerLabel;
+      svg.appendChild(cap);
+    }
+    if (cfg.legend) {
+      legend(el, labels.map(function (label, i) {
+        return { label: label, color: palette[i % palette.length], value: fmt.pct(values[i] / total) };
+      }));
+    }
+  }
+
+  // ---- Page building blocks: what dashboards and small systems kept
+  // re-implementing — a searchable sortable table, a KPI row, tabs, toasts,
+  // dialogs, saved state and mock data. Every call is opt-in, so a page that
+  // brings its own versions keeps them.
+
+  function resolve(target) {
+    return typeof target === "string" ? document.querySelector(target) : target;
+  }
+
+  function node(tag, className, text) {
+    var el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text != null) el.textContent = text;
+    return el;
+  }
+
+  function isNumberColumn(col) {
+    return col.align === "right" || col.format === "num" || col.format === "brl" || col.format === "pct";
+  }
+
+  function cellText(col, row) {
+    var value = row[col.key];
+    if (value == null) return "";
+    return col.format ? coerceFormat(col.format)(value) : String(value);
+  }
+
+  function compareValues(a, b) {
+    if (typeof a === "number" && typeof b === "number") return a - b;
+    return String(a == null ? "" : a).localeCompare(String(b == null ? "" : b), "pt-BR", { numeric: true });
+  }
+
+  // table(el, {columns, rows, search?, pageSize?, empty?, onRowClick?}) — a
+  // table.shell-table with sortable headers, an optional search box and
+  // pager. A column is {key, label, format?, align?, sortable? (true),
+  // render?(value, row) returning a Node or an HTML string — the page writes
+  // its cell templates as markup}. Plain values are always set as text.
+  // Returns {setRows, rows}.
+  function table(target, cfg) {
+    var root = resolve(target);
+    var cols = cfg.columns || [];
+    var pageSize = cfg.pageSize || 0;
+    var state = { rows: (cfg.rows || []).slice(), query: "", key: null, dir: 1, page: 0 };
+    root.innerHTML = "";
+    if (cfg.search) {
+      var search = node("input", "input skip-table-search");
+      search.type = "search";
+      search.placeholder = typeof cfg.search === "string" ? cfg.search : "Buscar…";
+      search.setAttribute("aria-label", search.placeholder);
+      search.addEventListener("input", function () {
+        state.query = search.value.trim().toLowerCase();
+        state.page = 0;
+        draw();
+      });
+      root.appendChild(search);
+    }
+    var tableEl = node("table", "shell-table");
+    var headRow = node("tr");
+    var heads = cols.map(function (col) {
+      var th = node("th", isNumberColumn(col) ? "num" : "", col.label == null ? col.key : col.label);
+      th.scope = "col";
+      if (col.sortable !== false) {
+        var toggle = function () {
+          state.dir = state.key === col.key ? -state.dir : 1;
+          state.key = col.key;
+          draw();
+        };
+        th.setAttribute("data-sort", col.key);
+        th.tabIndex = 0;
+        th.addEventListener("click", toggle);
+        th.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+        });
+      }
+      headRow.appendChild(th);
+      return th;
+    });
+    var thead = node("thead");
+    var tbody = node("tbody");
+    var wrap = node("div", "skip-table-wrap");
+    var pager = node("div", "skip-pager");
+    thead.appendChild(headRow);
+    tableEl.appendChild(thead);
+    tableEl.appendChild(tbody);
+    wrap.appendChild(tableEl);
+    root.appendChild(wrap);
+    if (pageSize) root.appendChild(pager);
+
+    function visibleRows() {
+      var rows = state.rows;
+      if (state.query) {
+        rows = rows.filter(function (row) {
+          return cols.some(function (col) { return cellText(col, row).toLowerCase().indexOf(state.query) >= 0; });
+        });
+      }
+      if (state.key) {
+        var key = state.key, dir = state.dir;
+        rows = rows.slice().sort(function (a, b) { return dir * compareValues(a[key], b[key]); });
+      }
+      return rows;
+    }
+
+    function drawRow(row) {
+      var tr = node("tr");
+      cols.forEach(function (col) {
+        var td = node("td", isNumberColumn(col) ? "num" : "");
+        if (!col.render) {
+          td.textContent = cellText(col, row);
+        } else {
+          var content = col.render(row[col.key], row);
+          if (content instanceof Node) td.appendChild(content);
+          else td.innerHTML = content == null ? "" : String(content);
+        }
+        tr.appendChild(td);
+      });
+      // The row stays a row (no role) and takes focus, so a keyboard reaches
+      // the same action; keys pressed on a control inside a cell are its own.
+      if (cfg.onRowClick) {
+        tr.style.cursor = "pointer";
+        tr.tabIndex = 0;
+        tr.addEventListener("click", function () { cfg.onRowClick(row); });
+        tr.addEventListener("keydown", function (e) {
+          if (e.target !== tr || (e.key !== "Enter" && e.key !== " ")) return;
+          e.preventDefault();
+          cfg.onRowClick(row);
+        });
+      }
+      return tr;
+    }
+
+    function pagerButton(label, disabled, step) {
+      var button = node("button", "btn", label);
+      button.type = "button";
+      button.setAttribute("data-variant", "outline");
+      button.setAttribute("data-size", "sm");
+      button.disabled = disabled;
+      button.addEventListener("click", function () { state.page += step; draw(); });
+      return button;
+    }
+
+    function draw() {
+      var rows = visibleRows();
+      heads.forEach(function (th, i) {
+        if (cols[i].key === state.key) th.setAttribute("aria-sort", state.dir > 0 ? "ascending" : "descending");
+        else th.removeAttribute("aria-sort");
+      });
+      var pages = pageSize ? Math.max(1, Math.ceil(rows.length / pageSize)) : 1;
+      state.page = Math.min(state.page, pages - 1);
+      var shown = pageSize ? rows.slice(state.page * pageSize, (state.page + 1) * pageSize) : rows;
+      tbody.innerHTML = "";
+      if (!shown.length) {
+        var empty = node("td", "skip-table-empty", cfg.empty || "Nenhum registro encontrado.");
+        empty.colSpan = cols.length;
+        tbody.appendChild(node("tr")).appendChild(empty);
+      }
+      shown.forEach(function (row) { tbody.appendChild(drawRow(row)); });
+      if (!pageSize) return;
+      pager.innerHTML = "";
+      var from = rows.length ? state.page * pageSize + 1 : 0;
+      pager.appendChild(node("span", "", from + "–" + Math.min(rows.length, (state.page + 1) * pageSize) + " de " + rows.length));
+      var nav = node("div", "row gap-2");
+      nav.appendChild(pagerButton("Anterior", state.page === 0, -1));
+      nav.appendChild(pagerButton("Próxima", state.page >= pages - 1, 1));
+      pager.appendChild(nav);
+    }
+
+    draw();
+    return {
+      setRows: function (rows) { state.rows = rows.slice(); draw(); },
+      rows: visibleRows
+    };
+  }
+
+  // kpis(el, [{label, value, format?, delta?, hint?}]) — KPI cards in a
+  // responsive grid; delta is a fraction (0.12 renders as ▲ 12%).
+  function kpis(target, items) {
+    var root = resolve(target);
+    root.innerHTML = "";
+    root.classList.add("shell-grid");
+    items.forEach(function (item) {
+      var card = node("div", "panel kpi");
+      card.appendChild(node("span", "kpi-label", item.label));
+      // Large money values go compact ("R$ 27,5 mi"): the full amount does
+      // not fit a KPI card at four per row.
+      var kpiFormat = item.format === "brl" && Math.abs(item.value) >= 1e6 ? fmt.brlCompact : (item.format ? coerceFormat(item.format) : null);
+      card.appendChild(node("span", "kpi-value", kpiFormat ? kpiFormat(item.value) : String(item.value)));
+      if (typeof item.delta === "number") {
+        var up = item.delta >= 0;
+        card.appendChild(node("span", "kpi-delta " + (up ? "up" : "down"), (up ? "▲ " : "▼ ") + fmt.pct(Math.abs(item.delta))));
+      }
+      if (item.hint) card.appendChild(node("span", "kpi-label", item.hint));
+      root.appendChild(card);
+    });
+  }
+
+  // badge(text, variant?) — a .badge node for table cells and lists;
+  // variant is "secondary" | "outline" | "destructive" (default: primary).
+  function badge(text, variant) {
+    var el = node("span", "badge", text);
+    if (variant) el.setAttribute("data-variant", variant);
+    return el;
+  }
+
+  // tabs(el) — wires one .tabs block: [role=tab] buttons inside
+  // [role=tablist], each with aria-controls naming its [role=tabpanel].
+  function tabs(target) {
+    var root = resolve(target);
+    var buttons = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+    function select(chosen) {
+      buttons.forEach(function (b) {
+        var on = b === chosen;
+        b.setAttribute("aria-selected", on ? "true" : "false");
+        b.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(b.getAttribute("aria-controls"));
+        if (panel) panel.hidden = !on;
+      });
+    }
+    buttons.forEach(function (b, i) {
+      b.addEventListener("click", function () { select(b); });
+      b.addEventListener("keydown", function (e) {
+        var step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!step) return;
+        var next = buttons[(i + step + buttons.length) % buttons.length];
+        next.focus();
+        select(next);
+      });
+    });
+    select(buttons.filter(function (b) { return b.getAttribute("aria-selected") === "true"; })[0] || buttons[0]);
+  }
+
+  // toast(message, {type?: "success" | "error", title?, duration?}) — a
+  // .toast in a shared .toaster at the bottom of the page.
+  function toast(message, opts) {
+    opts = opts || {};
+    var toaster = document.querySelector(".toaster") || document.body.appendChild(node("div", "toaster"));
+    var item = node("div", "toast");
+    item.setAttribute("role", opts.type === "error" ? "alert" : "status");
+    item.setAttribute("aria-hidden", "true");
+    if (opts.type) item.setAttribute("data-type", opts.type);
+    var content = node("div", "toast-content");
+    var section = node("section");
+    if (opts.title) section.appendChild(node("h2", "", opts.title));
+    section.appendChild(node("p", "", message));
+    content.appendChild(section);
+    item.appendChild(content);
+    toaster.appendChild(item);
+    requestAnimationFrame(function () { item.setAttribute("aria-hidden", "false"); });
+    setTimeout(function () {
+      item.setAttribute("aria-hidden", "true");
+      setTimeout(function () { item.remove(); }, 400);
+    }, opts.duration || 3000);
+  }
+
+  // Dialogs are native <dialog class="dialog">: a [data-dialog-open="id"]
+  // anywhere opens one, a [data-dialog-close] inside closes it, and a click on
+  // its backdrop closes it too. Plain dialog.showModal()/close() still work.
+  document.addEventListener("click", function (e) {
+    var target = e.target;
+    if (!(target instanceof Element)) return;
+    var opener = target.closest("[data-dialog-open]");
+    if (opener) {
+      var dialog = document.getElementById(opener.getAttribute("data-dialog-open"));
+      if (dialog && dialog.showModal && !dialog.open) dialog.showModal();
+      return;
+    }
+    var closer = target.closest("[data-dialog-close]");
+    if (closer && closer.closest("dialog")) {
+      closer.closest("dialog").close();
+      return;
+    }
+    if (target.tagName === "DIALOG" && target.classList.contains("dialog") && target.open) target.close();
+  });
+
+  // store(key, fallback) — JSON state in localStorage that never throws (a
+  // private window or a full quota falls back to memory): {get, set, update}.
+  function store(key, fallback) {
+    var memory;
+    // Set while the last write did not reach localStorage: what is stored
+    // there is older than memory until a write goes through again.
+    var unsaved = false;
+    var initial = function () { return fallback === undefined ? undefined : JSON.parse(JSON.stringify(fallback)); };
+    function get() {
+      if (!unsaved) {
+        try {
+          var raw = localStorage.getItem(key);
+          if (raw != null) return JSON.parse(raw);
+        } catch (e) { /* storage unavailable: memory below */ }
+      }
+      return memory !== undefined ? memory : initial();
+    }
+    function set(value) {
+      memory = value;
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        unsaved = false;
+      } catch (e) {
+        unsaved = true;
+      }
+      return value;
+    }
+    return { get: get, set: set, update: function (fn) { return set(fn(get())); } };
+  }
+
+  // mock — seeded random data, so a page asks for 90 days of numbers in one
+  // line instead of writing them out; the same seed gives the same data.
+  var FIRST = ["Ana", "Bruno", "Carla", "Diego", "Eduarda", "Felipe", "Gabriela", "Henrique", "Isabela", "João",
+    "Larissa", "Marcos", "Natália", "Otávio", "Paula", "Rafael", "Sofia", "Thiago", "Vanessa", "Lucas"];
+  var LAST = ["Silva", "Santos", "Oliveira", "Souza", "Pereira", "Costa", "Rodrigues", "Almeida", "Nascimento", "Lima",
+    "Araújo", "Fernandes", "Carvalho", "Gomes", "Martins", "Rocha", "Ribeiro", "Barbosa"];
+  var INITIALS = "ABCDEFGHIJLMNOPRSTV".split("");
+  var CITIES = ["São Paulo, SP", "Rio de Janeiro, RJ", "Belo Horizonte, MG", "Curitiba, PR", "Porto Alegre, RS",
+    "Salvador, BA", "Recife, PE", "Fortaleza, CE", "Brasília, DF", "Goiânia, GO", "Campinas, SP", "Florianópolis, SC",
+    "Manaus, AM", "Belém, PA", "Vitória, ES", "Natal, RN"];
+
+  function createMock(seed) {
+    var state = seed >>> 0;
+    var names = 0;
+    function random() {
+      state = (state + 0x6d2b79f5) >>> 0;
+      var t = state;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+    function int(min, max) { return min + Math.floor(random() * (max - min + 1)); }
+    function pick(list) { return list[Math.floor(random() * list.length)]; }
+    var mock = {
+      seed: function (value) { state = value >>> 0; names = 0; return mock; },
+      random: random,
+      int: int,
+      float: function (min, max, decimals) {
+        var factor = Math.pow(10, decimals == null ? 2 : decimals);
+        return Math.round((min + random() * (max - min)) * factor) / factor;
+      },
+      pick: pick,
+      chance: function (p) { return random() < p; },
+      // There are 360 first/last pairs. A page that draws until the name is
+      // new (do { … } while (used.has(name))) froze the tab past them, so
+      // later draws widen the space: a second surname after 200 (6,480), a
+      // middle initial after 4,000.
+      name: function () {
+        names++;
+        var middle = names > 4000 ? pick(INITIALS) + ". " : "";
+        return pick(FIRST) + " " + middle + (names > 200 ? pick(LAST) + " " : "") + pick(LAST);
+      },
+      city: function () { return pick(CITIES); },
+      // series(n, {start, trend, noise, min, decimals}) — a walk: each value
+      // moves by trend (fraction per step) plus up to ±noise of itself.
+      series: function (n, opts) {
+        opts = opts || {};
+        var value = opts.start == null ? 100 : opts.start;
+        var factor = Math.pow(10, opts.decimals || 0);
+        var out = [];
+        for (var i = 0; i < n; i++) {
+          out.push(Math.max(opts.min == null ? 0 : opts.min, Math.round(value * factor) / factor));
+          value = value * (1 + (opts.trend || 0)) * (1 + (random() * 2 - 1) * (opts.noise == null ? 0.08 : opts.noise));
+        }
+        return out;
+      },
+      // dates(n, {end?, step?: "day" | "week" | "month"}) — ISO dates
+      // (YYYY-MM-DD), oldest first, ending at end (default: today).
+      dates: function (n, opts) {
+        opts = opts || {};
+        var end = opts.end ? new Date(opts.end) : new Date();
+        var out = [];
+        for (var i = n - 1; i >= 0; i--) {
+          var d = new Date(end.getTime());
+          if (opts.step === "month") d.setMonth(d.getMonth() - i);
+          else d.setDate(d.getDate() - i * (opts.step === "week" ? 7 : 1));
+          out.push(d.toISOString().slice(0, 10));
+        }
+        return out;
+      },
+      // rows(n, spec) — n objects; each spec value is a function(i), a list
+      // to pick from, or a constant.
+      rows: function (n, spec) {
+        var out = [];
+        for (var i = 0; i < n; i++) {
+          var row = {};
+          for (var key in spec) {
+            var value = spec[key];
+            row[key] = typeof value === "function" ? value(i) : Array.isArray(value) ? pick(value) : value;
+          }
+          out.push(row);
+        }
+        return out;
+      }
+    };
+    return mock;
+  }
+
+  window.skipShell = { fmt: fmt };
+  window.skipChart = { bar: bar, line: line, donut: donut };
+  window.skipUI = { table: table, kpis: kpis, badge: badge, tabs: tabs, toast: toast };
+  window.skipStore = store;
+  window.skipMock = createMock(20261022);
+})();
+
+</script>
+<style>
+:root {
+--accent: #E60027;
+--accent-text: #b8001f;
+--accent-contrast: #ffffff;
+--font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+body { font-family: var(--font-sans); background: #f5f6f8; color: #1d1d1f; }
+.hitachi-top { background: #fff; border-bottom: 3px solid var(--accent); }
+.brand-mark { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.08em; }
+.brand-logo { width: 34px; height: 34px; border-radius: 8px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+.lang-switch { display: inline-flex; border: 1px solid #d9d9de; border-radius: 999px; overflow: hidden; background: #fff; }
+.lang-switch button { border: 0; background: transparent; padding: 6px 14px; font-weight: 600; cursor: pointer; color: #333; font-size: 0.82rem; }
+.lang-switch button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.print-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent-text); border-radius: 999px; padding: 6px 14px; font-weight: 600; font-size: 0.82rem; cursor: pointer; }
+.print-btn:hover { background: #fdecef; }
+.print-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.print-header { display: none; }
+.lang-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.hitachi-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); padding: 20px; border: 1px solid #ececf0; transition: box-shadow .2s ease, transform .2s ease; }
+.hitachi-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.hero-value { font-size: clamp(2.4rem, 5vw, 3.4rem); font-weight: 700; color: var(--accent-text); line-height: 1.1; }
+.hero-card { background: linear-gradient(135deg, rgba(230,0,39,0.06), #fff 60%); border-left: 5px solid var(--accent); }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; background: #fdecef; color: var(--accent-text); }
+.pill-muted { background: #efefF3; color: #3a3a42; }
+.label-up { text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em; color: #55555e; font-weight: 600; }
+.dash { color: #8a8a94; font-weight: 600; }
+.channel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.channel-card h3 { margin: 0; font-size: 1rem; }
+.channel-card dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; margin: 12px 0 0; font-size: 0.88rem; }
+.channel-card dt { color: #55555e; }
+.channel-card dd { margin: 0; text-align: right; font-weight: 600; }
+.channel-badge-icon { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; background: #fdecef; color: var(--accent-text); font-size: 0.8rem; font-weight: 700; }
+.calc-line { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding-top: 6px; margin-top: 4px; border-top: 1px dashed #e4e4ea; font-size: 0.82rem; }
+.calc-pill { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; background: #f0f0f4; color: #55555e; padding: 2px 6px; border-radius: 4px; font-weight: 600; margin-left: 6px; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.summary-item { background: #f7f7f9; border-radius: 10px; padding: 14px; }
+.summary-item .v { font-size: 1.35rem; font-weight: 700; margin-top: 4px; }
+#summary-title { overflow-wrap: anywhere; line-height: 1.35; }
+.detail-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.detail-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e4e4ea; }
+.engage-period { margin: 4px 0 0; font-size: 0.78rem; color: #55555e; break-inside: avoid; }
+.hero-card { break-inside: avoid; page-break-inside: avoid; }
+.note-saved { color: #1f7a3d; font-weight: 600; font-size: 0.85rem; opacity: 0; transition: opacity .3s; }
+.note-saved.show { opacity: 1; }
+
+.chart-legend { display: flex; gap: 16px; font-size: 0.82rem; color: #55555e; margin-top: 8px; flex-wrap: wrap; }
+.chart-legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.chart-line-legend span::before { border-radius: 0; height: 3px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.field-hint { font-size: 0.78rem; color: #66666f; margin-top: 4px; }
+.modal-backdrop-note { color: #55555e; font-size: 0.9rem; }
+.hitachi-footer { background: #fff; border-top: 1px solid #e4e4ea; }
+details.collapse { background: #fff; border-radius: 14px; border: 1px solid #ececf0; box-shadow: 0 2px 10px rgba(0,0,0,0.04); padding: 4px 18px; }
+details.collapse summary { cursor: pointer; font-weight: 600; padding: 14px 0; color: #1d1d1f; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+details.collapse summary::-webkit-details-marker { display: none; }
+details.collapse summary::after { content: "+"; color: var(--accent-text); font-size: 1.3rem; }
+details.collapse[open] summary::after { content: "–"; }
+details.collapse .inner { padding-bottom: 16px; }
+
+.bar-svg text { font-size: 11px; fill: #55555e; }
+.press-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.press-list li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed #e4e4ea; font-size: 0.9rem; }
+.press-list .day { color: #66666f; font-size: 0.8rem; }
+.press-link { color: var(--accent-text); font-weight: 600; text-decoration: underline; }
+.press-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; padding: 8px 0; border-bottom: 1px dashed #e4e4ea; }
+.press-row .field { margin: 0; }
+.press-remove { color: var(--accent-text); border: 1px solid var(--accent-text); background: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-weight: 600; }
+.press-remove:focus-visible, .press-link-out:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mql-strip, .ads-strip, .channel-card { break-inside: avoid; }
+.press-list-summary { margin-top: 12px; }
+.pr-strip { background: linear-gradient(135deg, rgba(230,0,39,0.06), #fff 60%); border-left: 5px solid var(--accent); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-top: 1px solid #ececf0; border-right: 1px solid #ececf0; border-bottom: 1px solid #ececf0; padding: 14px 18px; margin-bottom: 14px; }
+.pr-strip-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.pr-strip-title { margin: 0; font-size: 0.95rem; font-weight: 700; color: #1d1d1f; }
+.pr-strip-ctx { margin: 2px 0 0; font-size: 0.8rem; color: #55555e; }
+.pr-strip-count { font-size: 0.82rem; color: #55555e; font-weight: 600; white-space: nowrap; }
+.pr-chips { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.pr-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 12px; border-radius: 999px; background: #fff; border: 1px solid #d9d9de; color: #1d1d1f; font-size: 0.82rem; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.pr-chip a { color: var(--accent-text); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.pr-chip a:hover { text-decoration: underline; }
+.pr-chip a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.pr-chip .ext { font-size: 0.7rem; opacity: 0.8; }
+.pr-empty { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; color: #8a8a94; font-style: italic; font-size: 0.85rem; }
+.pr-toggle { margin-top: 10px; border: 0; background: transparent; color: var(--accent-text); font-weight: 600; font-size: 0.82rem; cursor: pointer; padding: 4px 0; text-decoration: underline; }
+.pr-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 640px) { .pr-strip-head { flex-direction: column; align-items: flex-start; gap: 4px; } }
+.ads-strip { background: linear-gradient(135deg, rgba(230,0,39,0.06), #fff 60%); border-left: 5px solid var(--accent); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-top: 1px solid #ececf0; border-right: 1px solid #ececf0; border-bottom: 1px solid #ececf0; padding: 14px 18px; margin-bottom: 14px; }
+.ads-strip-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.ads-strip-title { margin: 0; font-size: 0.95rem; font-weight: 700; color: #1d1d1f; }
+.ads-strip-ctx { margin: 2px 0 0; font-size: 0.8rem; color: #55555e; }
+.ads-strip-count { font-size: 0.82rem; color: #55555e; font-weight: 600; white-space: nowrap; }
+.ads-chips { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.ads-chip { display: inline-flex; align-items: center; max-width: 100%; padding: 4px 12px; border-radius: 999px; background: #fff; border: 1px solid #d9d9de; color: #1d1d1f; font-size: 0.82rem; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.ads-companies-empty { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; color: #8a8a94; font-style: italic; font-size: 0.85rem; }
+.ads-companies-toggle { margin-top: 10px; border: 0; background: transparent; color: var(--accent-text); font-weight: 600; font-size: 0.82rem; cursor: pointer; padding: 4px 0; text-decoration: underline; }
+.ads-companies-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.channel-grid { align-items: start; }
+@media (max-width: 640px) {
+.ads-strip-head { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+@media print {
+.ads-companies-toggle { display: none !important; }
+.ads-chip { background: #fff !important; color: #111 !important; border: 1px solid #555 !important; display: inline-flex !important; }
+.ads-strip { break-inside: avoid; page-break-inside: avoid; background: #fff !important; border: 1px solid #ccc !important; }
+.pr-strip { break-inside: avoid; page-break-inside: avoid; background: #fff !important; border: 1px solid #ccc !important; }
+.pr-strip-title, .pr-strip-ctx, .pr-strip-count { color: #111 !important; }
+.pr-chip { background: #fff !important; color: #111 !important; border: 1px solid #555 !important; }
+.pr-chip a { color: #111 !important; }
+.pr-toggle, .pr-empty-icon-hide { display: none !important; }
+.pr-chip[hidden] { display: inline-flex !important; }
+.ads-strip-title, .ads-strip-ctx, .ads-strip-count { color: #111 !important; }
+}
+.mql-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; background: linear-gradient(135deg, rgba(230,0,39,0.06), #fff 60%); border-left: 5px solid var(--accent); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-top: 1px solid #ececf0; border-right: 1px solid #ececf0; border-bottom: 1px solid #ececf0; padding: 14px 18px; margin-bottom: 14px; }
+.mql-strip .mql-value { font-size: 1.8rem; font-weight: 700; color: var(--accent-text); line-height: 1.1; }
+.mql-strip .mql-meta { font-size: 0.82rem; color: #55555e; }
+
+.field-legend { display: block; font-size: 0.78rem; color: #66666f; margin-top: 4px; }
+.mql-tip { color: #55555e; background: #fdf3f5; border-left: 3px solid var(--accent); padding: 6px 10px; border-radius: 6px; }
+.mql-field { border-left: 3px solid var(--accent); padding-left: 10px; background: linear-gradient(90deg, rgba(230,0,39,0.05), transparent 70%); border-radius: 6px; }
+.mql-badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; background: #fdecef; color: var(--accent-text); letter-spacing: 0.04em; vertical-align: 1px; }
+.field-error { display: none; color: var(--accent-text); font-size: 0.78rem; font-weight: 600; margin-top: 4px; }
+.field-error.show { display: block; }
+.input.is-invalid { border-color: var(--accent-text); }
+@media (max-width: 640px) { .mql-strip { flex-direction: column; align-items: flex-start; } .mql-strip .mql-value { font-size: 1.5rem; } }
+.press-list-summary h4 { margin: 0 0 4px; font-size: 0.85rem; }
+.press-count { color: #55555e; font-size: 0.8rem; }
+@media (max-width: 640px) { .press-row { grid-template-columns: 1fr; } .press-remove { justify-self: start; } }
+.bar-svg .grid { stroke: #ececf0; }
+.year-sep { border-top: 1px dashed #e4e4ea; margin: 14px 0 12px; }
+.filters-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 640px) { .filters-3 { grid-template-columns: 1fr; } }
+.year-pr-value { font-size: 1.5rem; font-weight: 700; color: var(--accent-text); line-height: 1.2; }
+.year-pr-note { font-size: 0.72rem; }
+.year-help { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 6px; border-radius: 50%; border: 1px solid #8a8a94; color: #55555e; font-size: 0.68rem; font-weight: 700; cursor: help; vertical-align: 2px; text-transform: none; letter-spacing: 0; }
+.year-help:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.year-explain { font-size: 0.72rem; line-height: 1.45; color: #55555e; margin: 4px 0 0; }
+.year-block { break-inside: avoid; page-break-inside: avoid; }
+@media print { .year-help { display: none !important; } .year-explain { color: #333 !important; font-size: 8.5pt; } .year-block { break-inside: avoid; page-break-inside: avoid; } }
+@media (max-width: 640px) { .year-pr-value { font-size: 1.3rem; } }
+.empty-line { color: #8a8a94; font-style: italic; }
+@media (max-width: 640px) {
+.hero-value { font-size: 2.1rem; }
+}
+@media print {
+body { background: #fff !important; color: #111 !important; font-size: 11pt; }
+.lang-switch, .no-print, button, .toolbar-actions, details.collapse[data-editor], [data-editor], .hitachi-footer, #filters-title ~ .row, #live-counter, .hitachi-card:has(#filter-month), .field-hint, .shell-hero, .hitachi-top .shell-hero, .hitachi-top .row > .brand-mark, dialog, .print-hide { display: none !important; }
+.hitachi-top { border-bottom: 2px solid #E60027; }
+.hitachi-top .shell-container { padding: 0 !important; }
+.hitachi-top .row { display: none !important; }
+.print-header { display: block !important; margin-bottom: 12px; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
+.print-header .ph-title { font-weight: 700; font-size: 14pt; color: #E60027; }
+.print-header .ph-meta { font-size: 10pt; color: #333; margin-top: 2px; }
+.hitachi-card, .channel-card, .summary-item, .hero-card { box-shadow: none !important; background: #fff !important; border: 1px solid #ccc !important; break-inside: avoid; page-break-inside: avoid; transform: none !important; }
+.channel-card, .mql-strip, .ads-strip, .press-list-summary { break-inside: avoid; page-break-inside: avoid; }
+.hitachi-card:hover { box-shadow: none !important; }
+.hero-value, .hero-value.text-xl { color: #111 !important; }
+.hero-card { background: #fff !important; }
+.label-up, .muted, .muted.text-xs { color: #333 !important; }
+#channel-grid { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px; }
+#chart-12m { min-height: 0 !important; }
+.bar-svg text { fill: #111 !important; font-size: 13px; }
+.bar-svg .grid { stroke: #999 !important; }
+.press-link { color: #111 !important; }
+.shell-section, .shell-container { max-width: 100% !important; }
+main section, details { break-inside: avoid; }
+#history-body, #hist-title, [aria-labelledby="hist-title"] { display: none !important; }
+.overflow-x-auto { display: none !important; }
+#print-filters { display: block !important; font-weight: 600; margin-bottom: 8px; }
+}
+#print-filters { display: none; }
+</style>
+</head>
+<body>
+<div class="print-header" aria-hidden="true">
+<div class="ph-title">HITACHI HMMS — Marketing Latam</div>
+<div class="ph-meta" id="print-meta"></div>
+</div>
+<header class="hitachi-top">
+<div class="shell-container p-4">
+<div class="row between items-center gap-3">
+<div class="brand-mark">
+<span class="brand-logo" aria-hidden="true">H</span>
+<span>HITACHI HMMS</span>
+</div>
+<div class="row gap-2 items-center no-print">
+<button type="button" class="print-btn" id="btn-print" aria-label="Print / PDF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span data-i18n="btnPrint">Print / PDF</span></button>
+<div class="lang-switch" role="group" aria-label="Idioma / Language">
+<button type="button" data-lang="en" aria-pressed="true">EN</button>
+<button type="button" data-lang="pt" aria-pressed="false">PT</button>
+<button type="button" data-lang="es" aria-pressed="false">ES</button>
+</div>
+</div>
+</div>
+<div class="shell-hero mt-4">
+<span class="pill" data-i18n="eyebrow">Marketing Latam</span>
+<h1 class="text-2xl font-bold mt-2 mb-1" data-i18n="title">Panel de Resultados de Marketing</h1>
+<p class="muted text-sm m-0" data-i18n="subtitle">Seguimiento mensual de campañas, canales y mercados de América del Sur.</p>
+</div>
+</div>
+</header>
+
+<main class="shell-container shell-section">
+<!-- Global filters -->
+<div id="print-filters"></div>
+<section class="hitachi-card mb-4" aria-labelledby="filters-title">
+<div class="row between items-center gap-3 mb-3">
+<div>
+<h2 id="filters-title" class="text-base font-semibold m-0" data-i18n="filtersTitle">Filtros globales</h2>
+<p class="muted text-xs m-0" data-i18n="filtersSub">Todos los indicadores se recalculan con estos filtros.</p>
+</div>
+<span class="pill pill-muted" id="live-counter">0 registros</span>
+</div>
+<div class="filters-3 gap-3">
+<div class="field">
+<label for="filter-year" class="text-sm font-medium" data-i18n="yearLabel">Año</label>
+<select class="input" id="filter-year"></select>
+<span class="field-hint" data-i18n="yearHint">Año de referencia de todos los indicadores.</span>
+</div>
+<div class="field">
+<label for="filter-month" class="text-sm font-medium" data-i18n="monthRef">Mes de referencia</label>
+<select class="input" id="filter-month"></select>
+<span class="field-hint" data-i18n="monthHint">Selecciona el mes que quieres analizar.</span>
+</div>
+<div class="field">
+<label for="filter-market" class="text-sm font-medium" data-i18n="market">Mercado</label>
+<select class="input" id="filter-market"></select>
+<span class="field-hint" data-i18n="marketHint">Filtra todos los indicadores por país.</span>
+</div>
+<div class="hitachi-card" id="last-update-card">
+<div class="label-up" data-i18n="lastUpdate">Última actualización</div>
+<div class="hero-value text-xl mt-1" style="font-size:1.6rem">—</div>
+<p class="muted text-xs m-0 mt-1" data-i18n="lastUpdateNote">Se actualiza al guardar cambios.</p>
+</div>
+</div>
+</section>
+
+<!-- Priority indicator -->
+<section class="shell-grid cols-3 gap-4 mb-4" aria-label="Indicadores principales">
+<div class="hitachi-card hero-card" style="grid-column: span 2;">
+<div class="label-up" data-i18n="engagementLabel">Personas que interactúan con la marca</div>
+<p class="engage-period" id="engage-period"></p>
+<div class="hero-value mt-2" id="kpi-engagement">—</div>
+<p class="muted text-sm mt-2 mb-0" data-i18n="engagementNote">ENGAGEMENT = pageviews del sitio + aperturas de e-mail + clics en LinkedIn + clics en Anuncios + 1% del alcance de PR. El 1% del alcance de PR es una fracción estimada, no una medición directa.</p>
+</div>
+<div class="shell-grid gap-3" style="grid-template-columns: 1fr;">
+<div class="hitachi-card">
+<div class="label-up" data-i18n="interviews">Interviews</div>
+<div class="text-2xl font-bold mt-1" id="kpi-interviews">—</div>
+<p class="muted text-xs m-0 mt-1" data-i18n="interviewsSub">Entrevistas publicadas en el mes.</p>
+</div>
+<div class="hitachi-card">
+<div class="label-up" data-i18n="prValue">PR media value — month</div>
+<div class="text-2xl font-bold mt-1" id="kpi-prvalue">—</div>
+<p class="muted text-xs m-0 mt-1" data-i18n="prValueSub">Valor equivalente en medios del mes.</p>
+</div>
+</div>
+</section>
+
+<!-- Chart 12 months -->
+<section class="shell-grid cols-3 gap-4 mb-4">
+<div class="hitachi-card" style="grid-column: span 2;">
+<div class="row between items-center mb-2">
+<div>
+<h2 class="text-base font-semibold m-0" id="chart12-title">Engagement — 12 months 2026</h2>
+<p class="muted text-xs m-0" data-i18n="chart12Sub">Personas comprometidas por mes del año de referencia.</p>
+</div>
+<span class="pill pill-muted" id="year-pill">2026</span>
+</div>
+<div class="chart-box" id="chart-12m" style="min-height:240px"></div>
+<p class="muted text-xs mt-2 mb-0" data-i18n="notPlotted">Months without entries are not plotted</p>
+</div>
+<div class="hitachi-card">
+<div class="year-block">
+<div class="label-up"><span data-i18n="yearAccum">Acumulado del año</span><span class="year-help" tabindex="0" role="img" id="help-year-eng" aria-label="" title="">ⓘ</span></div>
+<div class="hero-value mt-2" style="font-size:2.2rem" id="kpi-year">—</div>
+<p class="year-explain" id="year-eng-explain"></p>
+</div>
+<div class="year-sep" role="presentation"></div>
+<div class="year-block">
+<div class="label-up"><span data-i18n="prYearLabel">Valor de mídia de PR acumulado</span><span class="year-help" tabindex="0" role="img" id="help-year-pr" aria-label="" title="">ⓘ</span></div>
+<div class="year-pr-value mt-1" id="kpi-year-pr">—</div>
+<p class="year-explain" id="year-pr-explain"></p>
+<p class="muted text-xs mt-1 mb-0" id="kpi-year-pr-ctx"></p>
+</div>
+<p class="muted text-xs mt-2 mb-0" id="year-months-line"></p>
+<p class="year-pr-note muted mt-2 mb-0" id="kpi-year-pr-note" hidden></p>
+</div>
+</section>
+
+<!-- Monthly summary -->
+<section class="hitachi-card mb-4" aria-labelledby="summary-title">
+<h2 id="summary-title" class="text-base font-semibold m-0"><span data-i18n="summaryTitleBase">Resumen del mes</span><span id="summary-period"></span></h2>
+<p class="muted text-xs mt-1 mb-3" data-i18n="summarySub">Indicadores clave del mes y mercado seleccionados. Un guion indica dato no reportado.</p>
+<div class="summary-grid" id="summary-grid"></div>
+<p class="muted text-xs mt-2 mb-0" id="summary-medios" hidden></p>
+<p class="muted text-xs mt-1 mb-0" id="summary-ads-comp" hidden></p>
+<p class="muted text-xs mt-1 mb-0" id="summary-mql" hidden></p>
+
+</section>
+
+<!-- By channel -->
+<section class="mb-4" aria-labelledby="channel-title">
+<div class="mb-3">
+<h2 id="channel-title" class="text-base font-semibold m-0" data-i18n="channelTitle">Por canal — Resultados por canal</h2>
+<p class="muted text-xs m-0" data-i18n="channelSub">Métricas específicas por canal para el mes y mercado seleccionados.</p>
+</div>
+<div class="mql-strip" role="status">
+<div>
+<div class="label-up" data-i18n="mqlTotal">MQL — total del mes</div>
+<div class="mql-value mt-1" id="mql-total-value">—</div>
+</div>
+<div class="mql-meta" id="mql-total-meta"></div>
+</div>
+<div class="ads-strip" id="ads-strip" role="region" aria-label="Main companies"></div>
+<div class="pr-strip" id="pr-strip" role="region" aria-label="PR outlets"></div>
+<div class="channel-grid" id="channel-grid"></div>
+</section>
+
+<!-- Data entry -->
+<section class="hitachi-card mb-4" aria-labelledby="entry-title" data-editor>
+<h2 id="entry-title" class="text-base font-semibold m-0" data-i18n="entryTitle">Carga de datos / Data entry</h2>
+<p class="muted text-xs mt-1 mb-3" data-i18n="entrySub">Si ya existe un registro para el mes, mercado y canal, los valores se suman y la página avisa.</p>
+<p class="mql-tip text-xs mb-3" id="mql-tip"><span aria-hidden="true">★</span> <span data-i18n="mqlTip">El MQL se puede registrar en todos los canales — es el último campo del bloque del canal.</span></p>
+<form id="entry-form" class="stack gap-3">
+<div class="form-grid">
+<div class="field">
+<label for="e-year" class="text-sm font-medium" data-i18n="fYear">Año</label>
+<select class="input" id="e-year" required aria-describedby="e-year-err"></select>
+<span class="field-hint" data-i18n="required">Obligatorio</span>
+<span class="field-error" id="e-year-err" role="alert" data-i18n="yearRequired">Selecciona el año.</span>
+</div>
+<div class="field">
+<label for="e-month" class="text-sm font-medium" data-i18n="fMonth">Mes</label>
+<select class="input" id="e-month" required></select>
+<span class="field-hint" data-i18n="required">Obligatorio</span>
+</div>
+<div class="field">
+<label for="e-country" class="text-sm font-medium" data-i18n="fCountry">País</label>
+<select class="input" id="e-country"></select>
+<span class="field-hint" data-i18n="fCountryHint">Mercado del registro.</span>
+</div>
+<div class="field">
+<label for="e-channel" class="text-sm font-medium" data-i18n="fChannel">Canal</label>
+<select class="input" id="e-channel"></select>
+<span class="field-hint" data-i18n="fChannelHint">Elige el canal a registrar.</span>
+</div>
+<div class="field">
+<label for="e-owner" class="text-sm font-medium" data-i18n="fOwner">Responsable</label>
+<input class="input" id="e-owner" placeholder="Ej.: María Gómez">
+</div>
+</div>
+<div class="form-grid" id="e-values"></div>
+<div id="press-block" class="stack gap-2" hidden>
+<div>
+<h3 class="text-sm font-semibold m-0" data-i18n="pressBlockTitle">Medios donde salió la materia</h3>
+<p class="muted text-xs mt-1 mb-2" data-i18n="pressBlockNote">Esta lista reemplaza los medios guardados del mes; los valores numéricos se suman al registro existente.</p>
+</div>
+<div id="press-rows" class="stack gap-2"></div>
+<div>
+<button type="button" class="btn" data-variant="outline" data-size="sm" id="btn-add-press" data-i18n="btnAddPress">Añadir medio</button>
+</div>
+</div>
+<div id="ads-form-block" class="stack gap-2" hidden>
+<div>
+<h3 class="text-sm font-semibold m-0" data-i18n="adsBlockTitle">Empresas que interactuaron con la campaña</h3>
+<p class="muted text-xs mt-1 mb-2" data-i18n="adsBlockNote">Esta lista reemplaza las empresas guardadas del mes; los valores numéricos se suman al registro existente.</p>
+</div>
+<div id="ads-form-rows" class="stack gap-2"></div>
+<div>
+<button type="button" class="btn" data-variant="outline" data-size="sm" id="btn-add-company" data-i18n="btnAddCompany">Añadir empresa</button>
+</div>
+</div>
+<div class="row gap-2 wrap">
+<button type="submit" class="btn" data-i18n="btnSave">Guardar registro</button>
+<button type="button" class="btn" data-variant="outline" id="btn-clear" data-i18n="btnClear">Limpiar</button>
+<button type="button" class="btn" data-variant="outline" id="btn-export" data-i18n="btnExport">Exportar JSON</button>
+<button type="button" class="btn" data-variant="outline" id="btn-import" data-i18n="btnImport">Importar JSON</button>
+<button type="button" class="btn" data-variant="ghost" id="btn-restore" data-i18n="btnRestore">Restaurar datos originales</button>
+<input type="file" id="import-file" accept="application/json" hidden>
+</div>
+</form>
+</section>
+
+<!-- History -->
+<section class="hitachi-card mb-4" aria-labelledby="hist-title" data-editor>
+<h2 id="hist-title" class="text-base font-semibold m-0" data-i18n="histTitle">Historial de registros</h2>
+<p class="muted text-xs mt-1 mb-3" data-i18n="histSub">Todos los registros guardados en este navegador.</p>
+<div class="overflow-x-auto">
+<table class="shell-table w-full">
+<thead>
+<tr>
+<th data-i18n="colDate">Fecha</th>
+<th data-i18n="colMonth">Mes</th>
+<th data-i18n="colMarket">Mercado</th>
+<th data-i18n="colChannel">Canal</th>
+<th data-i18n="colValues">Valores</th>
+<th data-i18n="colOwner">Responsable</th>
+<th data-i18n="colActions">Acciones</th>
+</tr>
+</thead>
+<tbody id="history-body"></tbody>
+</table>
+</div>
+</section>
+
+<dialog class="dialog" id="confirm-dialog">
+<div>
+<header>
+<h2 data-i18n="confirmTitle">¿Eliminar registro?</h2>
+<p data-i18n="confirmText">Esta acción no se puede deshacer.</p>
+</header>
+<footer class="row gap-2" style="justify-content:flex-end">
+<button type="button" class="btn" data-variant="outline" data-dialog-close data-i18n="cancel">Cancelar</button>
+<button type="button" class="btn" data-variant="destructive" id="confirm-delete" data-i18n="delete">Eliminar</button>
+</footer>
+</div>
+</dialog>
+</main>
+
+<footer class="hitachi-footer">
+<div class="shell-container p-4 text-center">
+<p class="text-sm m-0" data-i18n="footer1">Hitachi HMMS · Panel de Marketing Latam. La identidad visual se inspira en el sitio corporativo de Hitachi.</p>
+<p class="muted text-xs m-0 mt-1" data-i18n="footer2">Datos guardados en el navegador de este equipo.</p>
+</div>
+</footer>
+
+<script>
+(function () {
+var MONTHS = {
+es: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+pt: ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],
+en: ["January","February","March","April","May","June","July","August","September","October","November","December"]
+};
+var COUNTRIES = [
+{ id: "AR", name: { es: "Argentina", pt: "Argentina", en: "Argentina" } },
+{ id: "BO", name: { es: "Bolivia", pt: "Bolívia", en: "Bolivia" } },
+{ id: "BR", name: { es: "Brasil", pt: "Brasil", en: "Brazil" } },
+{ id: "CL", name: { es: "Chile", pt: "Chile", en: "Chile" } },
+{ id: "CO", name: { es: "Colombia", pt: "Colômbia", en: "Colombia" } },
+{ id: "CR", name: { es: "Costa Rica", pt: "Costa Rica", en: "Costa Rica" } },
+{ id: "CU", name: { es: "Cuba", pt: "Cuba", en: "Cuba" } },
+{ id: "EC", name: { es: "Ecuador", pt: "Equador", en: "Ecuador" } },
+{ id: "SV", name: { es: "El Salvador", pt: "El Salvador", en: "El Salvador" } },
+{ id: "GT", name: { es: "Guatemala", pt: "Guatemala", en: "Guatemala" } },
+{ id: "HT", name: { es: "Haití", pt: "Haiti", en: "Haiti" } },
+{ id: "HN", name: { es: "Honduras", pt: "Honduras", en: "Honduras" } },
+{ id: "MX", name: { es: "México", pt: "México", en: "Mexico" } },
+{ id: "NI", name: { es: "Nicaragua", pt: "Nicarágua", en: "Nicaragua" } },
+{ id: "PA", name: { es: "Panamá", pt: "Panamá", en: "Panama" } },
+{ id: "PY", name: { es: "Paraguay", pt: "Paraguai", en: "Paraguay" } },
+{ id: "PE", name: { es: "Perú", pt: "Peru", en: "Peru" } },
+{ id: "PR", name: { es: "Puerto Rico", pt: "Porto Rico", en: "Puerto Rico" } },
+{ id: "DO", name: { es: "República Dominicana", pt: "República Dominicana", en: "Dominican Republic" } },
+{ id: "UY", name: { es: "Uruguay", pt: "Uruguai", en: "Uruguay" } },
+{ id: "VE", name: { es: "Venezuela", pt: "Venezuela", en: "Venezuela" } }
+];
+function countrySortName(c) {
+return c.name[lang].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+function sortedCountries() {
+return COUNTRIES.slice().sort(function (a, b) {
+var x = countrySortName(a), y = countrySortName(b);
+return x < y ? -1 : x > y ? 1 : 0;
+});
+}
+function normCountryKey(s) {
+return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+function countryFromAny(v) {
+if (v == null) return null;
+var key = normCountryKey(v);
+if (!key) return null;
+var found = null;
+COUNTRIES.forEach(function (c) {
+if (found) return;
+if (c.id.toLowerCase() === key) { found = c.id; return; }
+["es", "pt", "en"].forEach(function (l) {
+if (!found && normCountryKey(c.name[l]) === key) found = c.id;
+});
+});
+if (!found && key === "brazil") found = "BR";
+if (!found && key === "mexico") found = "MX";
+return found;
+}
+var CHANNELS = [
+{ id: "email", icon: "✉", name: { es: "E-mail", pt: "E-mail", en: "E-mail" }, fields: ["sent", "opens", "mql"] },
+{ id: "blog", icon: "✍", name: { es: "Blog", pt: "Blog", en: "Blog" }, fields: ["pageviews", "mql"] },
+{ id: "site", icon: "🌐", name: { es: "Sitio web", pt: "Site", en: "Website" }, fields: ["pageviews", "formSubmits", "mql"] },
+{ id: "ads", icon: "📣", name: { es: "Anuncios", pt: "Anúncios", en: "Ads" }, fields: ["impressions", "clicks", "spend", "mql"] },
+{ id: "pr", icon: "📰", name: { es: "PR / Imprensa", pt: "PR / Imprensa", en: "PR / Press" }, fields: ["reach", "interviews", "value", "mql"] },
+{ id: "events", icon: "🎪", name: { es: "Eventos", pt: "Eventos", en: "Events" }, fields: ["demos", "visitors", "mql"] }
+];
+
+var FIELD_META = {
+mql: { label: { es: "MQL", pt: "MQL", en: "MQL" }, type: "num", legend: true },
+clicks: { label: { es: "Clics", pt: "Cliques", en: "Clicks" }, type: "num" },
+impressions: { label: { es: "Impresiones", pt: "Impressões", en: "Impressions" }, type: "num" },
+spend: { label: { es: "Valor invertido (R$)", pt: "Valor gasto (R$)", en: "Amount spent (R$)" }, type: "brl" },
+sent: { label: { es: "Enviados", pt: "Enviados", en: "Sent" }, type: "num" },
+opens: { label: { es: "Aperturas", pt: "Aberturas", en: "Opens" }, type: "num" },
+pageviews: { label: { es: "Pageviews", pt: "Pageviews", en: "Pageviews" }, type: "num" },
+formSubmits: { label: { es: "Envíos de formulario", pt: "Envios de formulário", en: "Form submits" }, type: "num" },
+reach: { label: { es: "Alcance", pt: "Alcance", en: "Reach" }, type: "num" },
+interviews: { label: { es: "Entrevistas", pt: "Entrevistas", en: "Interviews" }, type: "num" },
+value: { label: { es: "Valor de medios (R$)", pt: "Valor de mídia (R$)", en: "Media value (R$)" }, type: "brl" },
+demos: { label: { es: "Demos realizadas", pt: "Demos realizadas", en: "Demos delivered" }, type: "num" },
+visitors: { label: { es: "Visitantes", pt: "Visitantes", en: "Visitors" }, type: "num", legend: { es: "Visitantes del stand en eventos del mes", pt: "Visitantes do estande em eventos no mês", en: "Stand visitors during events this month" } }
+};
+
+var SEED = [
+
+{ id: "s3", date: "2026-02-10", month: 1, country: "CL", channel: "email", owner: "María Gómez", values: { sent: 5200, opens: 1830 } },
+{ id: "s4", date: "2026-03-12", month: 2, country: "BR", channel: "pr", owner: "Ana Souza", values: { reach: 1450000, interviews: 2, value: 82400 } },
+{ id: "s5", date: "2026-03-18", month: 2, country: "CL", channel: "site", owner: "Diego Rojas", values: { pageviews: 4320, formSubmits: 28 } },
+{ id: "s6", date: "2026-04-08", month: 3, country: "BR", channel: "blog", owner: "Carlos Lima", values: { pageviews: 1840 } },
+{ id: "s7", date: "2026-05-14", month: 4, country: "CL", channel: "ads", owner: "Diego Rojas", values: { impressions: 185000, clicks: 3120, spend: 4650 }, companies: ["SQM", "Enel Chile", "Codelco"] },
+{ id: "s8", date: "2026-06-05", month: 5, country: "CL", channel: "pr", owner: "María Gómez", values: { reach: 980000, interviews: 1, value: 56300 } },
+{ id: "s9", date: "2026-07-09", month: 6, country: "BR", channel: "email", owner: "Ana Souza", values: { sent: 9800, opens: 3410 } },
+{ id: "s10", date: "2026-08-21", month: 7, country: "BR", channel: "ads", owner: "Carlos Lima", values: { impressions: 264000, clicks: 4890, spend: 12800 }, companies: ["Vale", "Petrobras", "Embraer", "Gerdau", "Votorantim", "Suzano", "WEG", "Klabin", "Cosan", "JBS", "Ambev", "Raízen"] },
+{ id: "s11", date: "2026-08-28", month: 7, country: "BR", channel: "site", owner: "Carlos Lima", values: { pageviews: 7420, formSubmits: 52 } },
+{ id: "s12", date: "2026-09-16", month: 8, country: "BR", channel: "pr", owner: "Ana Souza", values: { reach: 774000, interviews: 2, value: 70874 } },
+{ id: "s13", date: "2026-09-22", month: 8, country: "CL", channel: "ads", owner: "María Gómez", values: { impressions: 61200, clicks: 980, spend: 2850 }, companies: ["Codelco", "Antofagasta Minerals", "SQM", "BHP Escondida", "CMP", "Anglo American Sur"] },
+{ id: "s14", date: "2026-09-18", month: 8, country: "BR", channel: "ads", owner: "Carlos Lima", values: { impressions: 142000, clicks: 2310, spend: 5400 }, companies: ["Petrobras", "Vale", "Itaú", "Embraer", "Gerdau", "Natura"] }
+];
+var YEARS = [2026, 2027, 2028, 2029, 2030];
+var YEAR = 2026;
+var STORE = window.skipStore("hitachi-hmms-records-v6", SEED);
+var YEAR_PREF = window.skipStore("hitachi-hmms-year-v1", 2026);
+var VEHICLES = window.skipStore("hitachi-hmms-vehicles-v1", {});
+var lang = "en";
+var LOCALES = { en: "en-US", pt: "pt-BR", es: "es-ES" };
+var PRINT_LABELS = { en: { print: "Print / PDF", issued: "Issued", market: "Market", month: "Month", all: "All markets" }, pt: { print: "Imprimir / PDF", issued: "Emitido em", market: "Mercado", month: "Mês", all: "Todos os mercados" }, es: { print: "Imprimir / PDF", issued: "Emitido el", market: "Mercado", month: "Mes", all: "Todos los mercados" } };
+var editingId = null;
+var pendingDelete = null;
+var pressDraft = [];
+var pressSeq = 0;
+var adsDraft = [];
+var adsSeq = 0;
+
+function normLink(s) {
+var v = String(s || "").trim();
+if (!v) return "";
+if (/^https?:\/\//i.test(v)) return v;
+return "https://" + v;
+}
+
+function vehKey(year, month, country, channel) {
+return year + "|" + month + "|" + country + "|" + channel;
+}
+
+function getVehicles(year, month, country) {
+var all = VEHICLES.get() || {};
+return (all[vehKey(year, month, country, "pr")] || []).slice();
+}
+
+function setVehicles(year, month, country, list) {
+var all = VEHICLES.get() || {};
+var k = vehKey(year, month, country, "pr");
+if (list && list.length) all[k] = list; else delete all[k];
+VEHICLES.set(all);
+}
+
+function cleanVehicles(arr) {
+if (!Array.isArray(arr)) return [];
+return arr.filter(function (v) {
+return v && typeof v === "object" && String(v.medio || "").trim() !== "";
+}).map(function (v) {
+return { id: String(v.id || ("v" + Date.now() + Math.random().toString(36).slice(2, 7))), medio: String(v.medio).trim(), link: normLink(v.link) };
+});
+}
+
+function pressLinkHtml(v) {
+var name = escapeHtml(v.medio);
+if (!v.link) return name;
+return '<a class="press-link press-link-out" href="' + escapeHtml(v.link) + '" target="_blank" rel="noopener noreferrer">' + name + '</a>';
+}
+
+function renderPressRows() {
+var box = $("press-rows");
+if (!box) return;
+box.innerHTML = pressDraft.map(function (v) {
+return '<div class="press-row" data-vid="' + v.id + '">' +
+'<div class="field"><label class="text-sm font-medium" for="pm-' + v.id + '">' + t("pressMedio") + '</label>' +
+'<input class="input" id="pm-' + v.id + '" data-pm="medio" value="' + escapeHtml(v.medio) + '" placeholder="' + t("pressMedioPh") + '"></div>' +
+'<div class="field"><label class="text-sm font-medium" for="pl-' + v.id + '">' + t("pressLink") + '</label>' +
+'<input class="input" id="pl-' + v.id + '" data-pm="link" value="' + escapeHtml(v.link) + '" placeholder="https://..."></div>' +
+'<button type="button" class="press-remove" data-pm-remove="' + v.id + '" aria-label="' + t("pressRemove") + '">✕</button>' +
+'</div>';
+}).join("");
+}
+
+function syncPressDraftFromInputs() {
+var rows = document.querySelectorAll("#press-rows .press-row");
+pressDraft = Array.prototype.map.call(rows, function (row) {
+var vid = row.getAttribute("data-vid");
+return {
+id: vid,
+medio: row.querySelector('[data-pm="medio"]').value,
+link: row.querySelector('[data-pm="link"]').value
+};
+});
+}
+
+function loadPressDraft(month, country) {
+pressDraft = getVehicles(Number($("e-year").value), month, country);
+if (!pressDraft.length) pressDraft = [{ id: "p" + (++pressSeq) + "_" + Date.now(), medio: "", link: "" }];
+renderPressRows();
+}
+
+function updatePressVisibility() {
+var block = $("press-block");
+if (!block) return;
+var isPr = $("e-channel").value === "pr";
+block.hidden = !isPr;
+if (isPr) {
+loadPressDraft(Number($("e-month").value), $("e-country").value);
+} else {
+pressDraft = [];
+$("press-rows").innerHTML = "";
+}
+}
+
+function cleanCompanies(arr) {
+if (!Array.isArray(arr)) return [];
+var seen = {};
+var out = [];
+arr.forEach(function (v) {
+var nm = typeof v === "object" ? String(v.name || "").trim() : String(v || "").trim();
+if (nm && !seen[nm.toLowerCase()]) {
+seen[nm.toLowerCase()] = true;
+out.push(nm);
+}
+});
+return out;
+}
+
+function renderAdsFormRows() {
+var box = $("ads-form-rows");
+if (!box) return;
+box.innerHTML = adsDraft.map(function (v) {
+return '<div class="press-row" data-cid="' + v.id + '">' +
+'<div class="field" style="grid-column: span 2"><label class="text-sm font-medium" for="cn-' + v.id + '">' + t("companyLabel") + '</label>' +
+'<input class="input" id="cn-' + v.id + '" data-cn="name" value="' + escapeHtml(v.name) + '" placeholder="' + t("companyPh") + '"></div>' +
+'<button type="button" class="press-remove" data-cn-remove="' + v.id + '" aria-label="' + t("removeCompany") + '">✕</button>' +
+'</div>';
+}).join("");
+}
+
+function syncAdsDraftFromInputs() {
+var rows = document.querySelectorAll("#ads-form-rows .press-row");
+adsDraft = Array.prototype.map.call(rows, function (row) {
+var cid = row.getAttribute("data-cid");
+var inp = row.querySelector('[data-cn="name"]');
+return { id: cid, name: inp ? inp.value : "" };
+});
+}
+
+function getChannelCompanies(month, country) {
+var r = records().filter(function (x) {
+return x.year === Number($("e-year").value) && x.month === month && x.country === country && x.channel === "ads";
+})[0];
+return (r && r.companies) ? r.companies.slice() : [];
+}
+
+function loadAdsDraft(month, country) {
+var list = getChannelCompanies(month, country);
+if (list.length) {
+adsDraft = list.map(function (c) { return { id: "c" + (++adsSeq) + "_" + Date.now(), name: c }; });
+} else {
+adsDraft = [{ id: "c" + (++adsSeq) + "_" + Date.now(), name: "" }];
+}
+renderAdsFormRows();
+}
+
+function updateAdsVisibility() {
+var block = $("ads-form-block");
+if (!block) return;
+var isAds = $("e-channel").value === "ads";
+block.hidden = !isAds;
+if (isAds) {
+loadAdsDraft(Number($("e-month").value), $("e-country").value);
+} else {
+adsDraft = [];
+$("ads-form-rows").innerHTML = "";
+}
+}
+
+function t(key) {
+return (I18N[lang] && I18N[lang][key]) || key;
+}
+
+function $(id) { return document.getElementById(id); }
+function fmtNum(v) { return Math.round(Number(v) || 0).toLocaleString(LOCALES[lang]); }
+function fmtBrl(v) { return "R$ " + Math.round(Number(v) || 0).toLocaleString(LOCALES[lang]); }
+
+function findChannel(id) {
+return CHANNELS.filter(function (c) { return c.id === id; })[0] || null;
+}
+
+function parsePeriod(rec) {
+var y = null, m = null;
+if (typeof rec.period === "string" && /^\d{4}-\d{2}$/.test(rec.period)) {
+y = Number(rec.period.slice(0, 4));
+m = Number(rec.period.slice(5, 7)) - 1;
+}
+if (rec.year != null && !isNaN(rec.year)) y = Number(rec.year);
+if (y == null || y < 2026 || y > 2030) y = YEAR;
+if (rec.month == null || isNaN(rec.month)) {
+if (m != null) rec.month = m;
+}
+return y;
+}
+
+function sanitize(rec) {
+if (!rec || !rec.channel) return null;
+var ch = findChannel(rec.channel);
+if (!ch) return null;
+var recYear = parsePeriod(rec);
+var mo = Number(rec.month);
+
+var clean = {
+id: String(rec.id || ("r" + Date.now())),
+date: String(rec.date || new Date().toISOString().slice(0, 10)),
+year: recYear,
+month: mo >= 0 && mo <= 11 ? mo : 0,
+country: countryFromAny(rec.country) || String(rec.country || "CL"),
+channel: ch.id,
+owner: String(rec.owner || ""),
+companies: ch.id === "ads" && Array.isArray(rec.companies) ? cleanCompanies(rec.companies) : [],
+values: {}
+};
+
+var raw = rec.values || {};
+// Field equivalence migration:
+// clicks / cliques -> clicks
+// impressions / impressoes -> impressions
+// opens / aberturas -> opens
+// pageviews / visits / visitas -> pageviews
+// spend / valorGasto / cost -> spend
+// sent / enviados -> sent
+// formSubmits / enviosFormulario / form_submits -> formSubmits
+// reach, interviews, value -> PR
+ch.fields.forEach(function (f) {
+var val = null;
+if (f === "clicks") {
+val = raw.clicks != null ? raw.clicks : (raw.cliques != null ? raw.cliques : null);
+} else if (f === "impressions") {
+val = raw.impressions != null ? raw.impressions : (raw.impressoes != null ? raw.impressoes : null);
+} else if (f === "spend") {
+val = raw.spend != null ? raw.spend : (raw.valorGasto != null ? raw.valorGasto : (raw.cost != null ? raw.cost : null));
+} else if (f === "sent") {
+val = raw.sent != null ? raw.sent : (raw.enviados != null ? raw.enviados : null);
+} else if (f === "opens") {
+val = raw.opens != null ? raw.opens : (raw.aberturas != null ? raw.aberturas : null);
+} else if (f === "pageviews") {
+val = raw.pageviews != null ? raw.pageviews : (raw.visits != null ? raw.visits : (raw.visitas != null ? raw.visitas : null));
+} else if (f === "formSubmits") {
+val = raw.formSubmits != null ? raw.formSubmits : (raw.enviosFormulario != null ? raw.enviosFormulario : (raw.form_submits != null ? raw.form_submits : null));
+} else if (f === "mql") {
+val = raw.mql;
+} else if (f === "reach") {
+val = raw.reach;
+} else if (f === "interviews") {
+val = raw.interviews;
+} else if (f === "value") {
+val = raw.value;
+} else if (f === "demos") {
+val = raw.demos;
+} else if (f === "visitors") {
+val = raw.visitors;
+}
+if (val != null && val !== "" && !isNaN(val)) {
+clean.values[f] = Math.max(0, Math.round(Number(val)));
+}
+});
+
+return clean;
+}
+
+function mergeRecords(list) {
+var out = [];
+var idx = {};
+list.forEach(function (r) {
+var k = r.year + "|" + r.month + "|" + r.country + "|" + r.channel;
+if (idx[k] == null) { idx[k] = out.length; out.push(r); return; }
+var ex = out[idx[k]];
+Object.keys(r.values || {}).forEach(function (f) {
+ex.values[f] = (ex.values[f] || 0) + Number(r.values[f]);
+});
+if (r.channel === "ads") {
+ex.companies = cleanCompanies((ex.companies || []).concat(r.companies || []));
+}
+if (r.owner && !ex.owner) ex.owner = r.owner;
+if (r.date > ex.date) ex.date = r.date;
+});
+return out;
+}
+
+function records() {
+return mergeRecords((STORE.get() || []).map(sanitize).filter(Boolean));
+}
+function saveRecords(list) {
+STORE.set(mergeRecords(list.map(sanitize).filter(Boolean)));
+}
+
+function getYearFilter() { return Number($("filter-year").value); }
+function getMonthFilter() { return Number($("filter-month").value); }
+function getMarketFilter() { return $("filter-market").value; }
+
+function matchesMarket(r, market) { return market === "ALL" || r.country === market; }
+function matchesYear(r) { return r.year === getYearFilter(); }
+
+function monthlyTotals(field, market, channelFilter) {
+var out = {};
+var hasData = {};
+records().forEach(function (r) {
+if (!matchesMarket(r, market) || !matchesYear(r)) return;
+if (channelFilter && r.channel !== channelFilter) return;
+var v = r.values[field];
+if (v != null) {
+hasData[r.month] = true;
+out[r.month] = (out[r.month] || 0) + Number(v);
+}
+});
+return { totals: out, hasData: hasData };
+}
+
+function engagementByMonth(market) {
+var out = {};
+records().forEach(function (r) {
+if (!matchesMarket(r, market) || !matchesYear(r)) return;
+var e = 0;
+var v = r.values || {};
+// ENGAGEMENT = site pageviews + email opens + ads clicks + 1% of PR reach
+if (r.channel === "site" && v.pageviews != null) e += v.pageviews;
+if (r.channel === "email" && v.opens != null) e += v.opens;
+if (r.channel === "ads" && v.clicks != null) e += v.clicks;
+if (r.channel === "pr" && v.reach != null) e += Math.round(v.reach * 0.01);
+if (r.channel === "events" && v.visitors != null) e += v.visitors;
+if (!e) return;
+out[r.month] = (out[r.month] || 0) + e;
+});
+return out;
+}
+
+function renderFilters() {
+var ySel = $("filter-year"), eYear = $("e-year");
+var yCur = ySel.value || String(YEAR_PREF.get() || 2026);
+ySel.innerHTML = ""; eYear.innerHTML = "";
+YEARS.forEach(function (y) { ySel.add(new Option(String(y), y)); eYear.add(new Option(String(y), y)); });
+ySel.value = yCur; eYear.value = yCur;
+YEAR = Number(ySel.value);
+var mSel = $("filter-month"), kSel = $("filter-market"), eMonth = $("e-month"), eCountry = $("e-country"), eChannel = $("e-channel");
+var cur = mSel.value || "7";
+mSel.innerHTML = ""; eMonth.innerHTML = "";
+MONTHS[lang].forEach(function (name, i) {
+mSel.add(new Option(name, i));
+eMonth.add(new Option(name, i));
+});
+mSel.value = cur; eMonth.value = mSel.value;
+var kCur = kSel.value || "ALL";
+kSel.innerHTML = ""; eCountry.innerHTML = "";
+kSel.add(new Option(lang === "pt" ? "Todos os mercados" : lang === "en" ? "All markets" : "Todos los mercados", "ALL"));
+sortedCountries().forEach(function (c) { kSel.add(new Option(c.name[lang], c.id)); eCountry.add(new Option(c.name[lang], c.id)); });
+kSel.value = kCur;
+if (!eCountry.value) eCountry.value = "";
+eChannel.innerHTML = "";
+CHANNELS.forEach(function (c) { eChannel.add(new Option(c.name[lang], c.id)); });
+}
+
+var EXPLAIN = {
+engEn: { explain: "Sum of people who interacted with the brand from January to the selected month of {year} — it is a running total, not a monthly figure.", tip: "Running total of engagement from January to the selected month of the year." },
+engPt: { explain: "Soma das pessoas que interagiram com a marca de janeiro até o mês selecionado de {ano} — é um total acumulado, não o valor do mês.", tip: "Total acumulado de engagement de janeiro até o mês selecionado do ano." },
+engEs: { explain: "Suma de las personas que interactuaron con la marca de enero al mes seleccionado de {año} — es un total acumulado, no el valor del mes.", tip: "Total acumulado de engagement desde enero hasta el mes seleccionado del año." },
+prEn: { explain: "Estimated earned media value of PR coverage published from January to the selected month of {year} — what the coverage would have cost as paid media, not actual spend.", tip: "Estimated earned media value of PR coverage year to date — not actual spend." },
+prPt: { explain: "Valor estimado de mídia espontânea das matérias de PR publicadas de janeiro até o mês selecionado de {ano} — quanto essa cobertura custaria como mídia paga, não é investimento realizado.", tip: "Valor estimado de mídia espontânea das matérias de PR no acumulado do ano — não é investimento realizado." },
+prEs: { explain: "Valor estimado de medios ganados de las materias de PR publicadas de enero al mes seleccionado de {año} — cuánto habría costado esa cobertura como medios pagos, no es gasto real.", tip: "Valor estimado de medios ganados de las materias de PR en el acumulado del año — no es gasto real." }
+};
+var HELP_LABEL = { en: "Help: ", pt: "Ajuda: ", es: "Ayuda: " };
+var MONTHS_LINE = {
+en: { one: "1 month reported — January to {m} {y}", many: "{n} months reported — January to {m} {y}", none: "No records for {y} yet." },
+pt: { one: "1 mês reportado — janeiro a {m} de {y}", many: "{n} meses reportados — janeiro a {m} de {y}", none: "Sem registros em {y} ainda." },
+es: { one: "1 mes reportado — enero a {m} de {y}", many: "{n} meses reportados — enero a {m} de {y}", none: "Sin registros en {y} todavía." }
+};
+function lastReportedMonth(mk) {
+var eng = engagementByMonth(mk);
+var prRes = monthlyTotals("value", mk, "pr");
+var last = -1, count = 0;
+for (var i = 0; i < 12; i++) {
+var has = (eng[i] != null) || prRes.hasData[i];
+if (has) { count++; last = i; }
+}
+return { count: count, last: last };
+}
+function renderYearExplain(mk) {
+var y = String(getYearFilter());
+var eng = EXPLAIN[lang === "en" ? "engEn" : lang === "pt" ? "engPt" : "engEs"];
+var pr = EXPLAIN[lang === "en" ? "prEn" : lang === "pt" ? "prPt" : "prEs"];
+var ye = $("year-eng-explain"), yp = $("year-pr-explain");
+if (!ye) return;
+ye.textContent = eng.explain.replace("{year}", y).replace("{ano}", y).replace("{año}", y);
+yp.textContent = pr.explain.replace("{year}", y).replace("{ano}", y).replace("{año}", y);
+var hE = $("help-year-eng"), hP = $("help-year-pr");
+var pre = HELP_LABEL[lang];
+hE.setAttribute("title", eng.tip);
+hE.setAttribute("aria-label", pre + eng.tip);
+hP.setAttribute("title", pr.tip);
+hP.setAttribute("aria-label", pre + pr.tip);
+var info = lastReportedMonth(mk);
+var line = $("year-months-line");
+if (info.count === 0) {
+line.textContent = MONTHS_LINE[lang].none.replace("{y}", y);
+} else {
+var mName = MONTHS[lang][info.last];
+var tpl = info.count === 1 ? MONTHS_LINE[lang].one : MONTHS_LINE[lang].many;
+line.textContent = tpl.replace("{n}", info.count).replace("{m}", mName).replace("{y}", y);
+}
+}
+function renderYearPr(mk) {
+var prRes = monthlyTotals("value", mk, "pr");
+var months = 0, sum = 0;
+for (var i = 0; i < 12; i++) {
+if (prRes.hasData[i]) { months++; sum += Number(prRes.totals[i]) || 0; }
+}
+var valEl = $("kpi-year-pr"), ctxEl = $("kpi-year-pr-ctx"), noteEl = $("kpi-year-pr-note");
+if (!valEl) return;
+valEl.textContent = months ? fmtBrl(sum) : "—";
+var key = months === 1 ? "prYearCtxOne" : "prYearCtx";
+ctxEl.textContent = t(key).replace("{n}", months);
+noteEl.textContent = t("prYearNote");
+noteEl.hidden = true;
+renderYearExplain(mk);
+}
+
+function renderEngagePeriod() {
+var el = $("engage-period");
+if (!el) return;
+var mk = getMarketFilter();
+var tpl = I18N[lang].engPeriod;
+var txt = tpl.replace("{m}", MONTHS[lang][getMonthFilter()]).replace("{y}", getYearFilter());
+if (mk !== "ALL") {
+var c = COUNTRIES.filter(function (x) { return x.id === mk; })[0];
+if (c) txt = I18N[lang].engPeriodMarket.replace("{m}", MONTHS[lang][getMonthFilter()]).replace("{y}", getYearFilter()).replace("{c}", c.name[lang]);
+}
+el.textContent = txt;
+}
+
+function renderKpis() {
+var m = getMonthFilter(), mk = getMarketFilter();
+renderYearPr(mk);
+renderEngagePeriod();
+var eng = engagementByMonth(mk)[m];
+$("kpi-engagement").textContent = eng == null ? "—" : fmtNum(eng);
+
+var interviewsRes = monthlyTotals("interviews", mk, "pr");
+$("kpi-interviews").textContent = interviewsRes.hasData[m] ? fmtNum(interviewsRes.totals[m] || 0) : "—";
+
+var prvRes = monthlyTotals("value", mk, "pr");
+$("kpi-prvalue").textContent = prvRes.hasData[m] ? fmtBrl(prvRes.totals[m] || 0) : "—";
+
+var yearEng = engagementByMonth(mk);
+var sum = 0, any = false;
+Object.keys(yearEng).forEach(function (k) { sum += yearEng[k]; any = true; });
+$("kpi-year").textContent = any ? fmtNum(sum) : "—";
+$("year-pill").textContent = String(getYearFilter());
+$("live-counter").textContent = records().length + " " + (lang === "en" ? "records" : lang === "pt" ? "registros" : "registros");
+}
+
+function renderSummary() {
+var m = getMonthFilter(), mk = getMarketFilter();
+var recs = records().filter(function (r) { return r.month === m && matchesMarket(r, mk) && matchesYear(r); });
+
+function channelSum(chanId, field) {
+var has = false, sum = 0;
+recs.filter(function (r) { return r.channel === chanId; }).forEach(function (r) {
+if (r.values && r.values[field] != null) {
+has = true;
+sum += r.values[field];
+}
+});
+return has ? sum : null;
+}
+
+var prCount = renderPressSummary(m, mk).length;
+var mqlTotal = mqlTotalFor(m, mk);
+var adsCompList = getAdsCompanies(m, mk);
+var items = [
+{ label: { es: "Engagement", pt: "Engagement", en: "Engagement" }, v: engagementByMonth(mk)[m] },
+
+{ label: { es: "Site pageviews", pt: "Site pageviews", en: "Website pageviews" }, v: channelSum("site", "pageviews") },
+{ label: { es: "Site envíos formulario", pt: "Site envios formulário", en: "Form submits" }, v: channelSum("site", "formSubmits") },
+{ label: { es: "E-mail aperturas", pt: "E-mail aberturas", en: "Email opens" }, v: channelSum("email", "opens") },
+{ label: { es: "Anuncios impresiones", pt: "Anúncios impressões", en: "Ads impressions" }, v: channelSum("ads", "impressions") },
+{ label: { es: "Anuncios clics", pt: "Anúncios cliques", en: "Ads clicks" }, v: channelSum("ads", "clicks") },
+{ label: { es: "Anuncios valor gastado", pt: "Anúncios valor gasto", en: "Ads amount spent" }, v: channelSum("ads", "spend"), brl: true },
+{ label: { es: "Blog pageviews", pt: "Blog pageviews", en: "Blog pageviews" }, v: channelSum("blog", "pageviews") },
+{ label: { es: "PR entrevistas", pt: "PR entrevistas", en: "PR interviews" }, v: channelSum("pr", "interviews") },
+{ label: { es: "PR media value", pt: "PR media value", en: "PR media value" }, v: channelSum("pr", "value"), brl: true },
+{ label: { es: "Demos realizadas", pt: "Demos realizadas", en: "Demos delivered" }, v: channelSum("events", "demos") },
+{ label: { es: "Visitantes", pt: "Visitantes", en: "Visitors" }, v: channelSum("events", "visitors") }
+];
+
+var html = "";
+items.forEach(function (it) {
+var val = it.v == null ? '<span class="dash">—</span>' : (it.brl ? fmtBrl(it.v) : fmtNum(it.v));
+html += '<div class="summary-item"><div class="label-up">' + it.label[lang] + '</div><div class="v">' + val + '</div></div>';
+});
+$("summary-grid").innerHTML = html;
+var sumEl = $("summary-medios");
+if (sumEl) {
+sumEl.textContent = prCount ? t("summaryMedios").replace("{n}", prCount) : "";
+sumEl.hidden = !prCount;
+}
+var adsCompEl = $("summary-ads-comp");
+if (adsCompEl) {
+var nComp = adsCompList.length;
+adsCompEl.textContent = nComp ? (nComp === 1 ? t("summaryAdsCompOne") : t("summaryAdsComp").replace("{n}", nComp)) : "";
+adsCompEl.hidden = !nComp;
+}
+var mqlEl = $("summary-mql");
+if (mqlEl) {
+mqlEl.textContent = mqlTotal > 0 ? t("mqlSummary").replace("{n}", fmtNum(mqlTotal)) : "";
+mqlEl.hidden = !(mqlTotal > 0);
+}
+}
+
+function mqlTotalFor(m, mk) {
+var total = 0;
+records().forEach(function (r) {
+if (r.month !== m || !matchesMarket(r, mk) || !matchesYear(r)) return;
+total += Number((r.values && r.values.mql) || 0);
+});
+return total;
+}
+
+function mqlChannelCount(m, mk) {
+var chans = {};
+records().forEach(function (r) {
+if (r.month !== m || !matchesMarket(r, mk) || !matchesYear(r)) return;
+if (Number((r.values && r.values.mql) || 0) > 0) chans[r.channel] = true;
+});
+return Object.keys(chans).length;
+}
+
+function renderMqlStrip() {
+var m = getMonthFilter(), mk = getMarketFilter();
+var total = mqlTotalFor(m, mk);
+var n = mqlChannelCount(m, mk);
+var valEl = $("mql-total-value"), metaEl = $("mql-total-meta");
+if (!valEl) return;
+valEl.textContent = total > 0 ? fmtNum(total) : "—";
+metaEl.textContent = n === 1 ? t("mqlChannelsOne") : t("mqlChannels").replace("{n}", n);
+}
+
+function renderPressSummary(m, mk) {
+var vs = [];
+var mkts = mk === "ALL" ? COUNTRIES.map(function (c) { return c.id; }) : [mk];
+mkts.forEach(function (c) { vs = vs.concat(getVehicles(getYearFilter(), m, c)); });
+return vs;
+}
+
+function renderChannels() {
+var m = getMonthFilter(), mk = getMarketFilter();
+var html = "";
+
+CHANNELS.forEach(function (c) {
+var rows = records().filter(function (r) { return r.channel === c.id && r.month === m && matchesMarket(r, mk) && matchesYear(r); });
+var dl = "";
+var channelValues = {};
+
+c.fields.forEach(function (f) {
+var sum = null;
+rows.forEach(function (r) {
+if (r.values && r.values[f] != null) {
+sum = (sum || 0) + Number(r.values[f]);
+}
+});
+channelValues[f] = sum;
+var meta = FIELD_META[f];
+if (f === "mql") return;
+var val = sum == null ? '<span class="dash">—</span>' : (meta.type === "brl" ? fmtBrl(sum) : fmtNum(sum));
+dl += '<dt>' + meta.label[lang] + '</dt><dd>' + val + '</dd>';
+});
+
+// Calculated open rate for email
+if (c.id === "email" && channelValues.sent != null && channelValues.sent > 0) {
+var rate = ((channelValues.opens || 0) / channelValues.sent * 100).toFixed(1).replace(".", ",");
+var calcTitle = lang === "pt" ? "Taxa de abertura" : (lang === "en" ? "Open rate" : "Tasa de apertura");
+var calcBadge = lang === "en" ? "calculated" : "calculada";
+dl += '<div class="calc-line"><span>' + calcTitle + '<span class="calc-pill">' + calcBadge + '</span></span><strong style="color:var(--accent-text)">' + rate + '%</strong></div>';
+}
+
+html += '<article class="hitachi-card channel-card">' +
+'<div class="row between items-center">' +
+'<div class="row items-center gap-2">' +
+'<span class="channel-badge-icon" aria-hidden="true">' + c.icon + '</span>' +
+'<h3 class="m-0 font-semibold">' + c.name[lang] + '</h3>' +
+'</div>' +
+'<span class="pill ' + (rows.length ? '' : 'pill-muted') + '">' + rows.length + ' ' + (lang === "en" ? (rows.length === 1 ? "entry" : "entries") : (rows.length === 1 ? "registro" : "registros")) + '</span>' +
+'</div>' +
+'<dl>' + dl + '</dl>' +
+""
++
+'</article>';
+});
+
+$("channel-grid").innerHTML = html;
+renderAdsStrip();
+renderPrStrip();
+renderMqlStrip();
+}
+
+function renderAdsStrip() {
+var strip = $("ads-strip");
+if (!strip) return;
+var m = getMonthFilter(), mk = getMarketFilter();
+var names = getAdsCompanies(m, mk);
+var n = names.length;
+var mkName = mk === "ALL" ? (lang === "en" ? "All markets" : lang === "pt" ? "Todos os mercados" : "Todos los mercados") : (COUNTRIES.filter(function (c) { return c.id === mk; })[0] || { name: {} }).name[lang];
+var ctx = MONTHS[lang][m] + " " + getYearFilter() + " · " + mkName + " · " + t("adsStripCtx");
+var countTxt = n === 1 ? t("adsCountOne") : t("adsCountMany").replace("{n}", n);
+var body = n ? '<ul class="ads-chips">' + names.map(function (nm, i) {
+return '<li class="ads-chip" data-ads-idx="' + i + '">' + escapeHtml(nm) + '</li>';
+}).join("") + '</ul>' : '<p class="ads-companies-empty"><span aria-hidden="true">○</span>' + t("adsCompaniesNone") + '</p>';
+var toggle = n > 10 ? '<button type="button" class="ads-companies-toggle" id="ads-toggle" aria-expanded="false" data-total="' + n + '">' + t("adsShowAll").replace("{n}", n) + '</button>' : "";
+strip.innerHTML = '<div class="ads-strip-head">' +
+'<div><h3 class="ads-strip-title">' + t("adsStripTitle") + '</h3>' +
+'<p class="ads-strip-ctx">' + ctx + '</p></div>' +
+'<span class="ads-strip-count">' + countTxt + '</span>' +
+'</div>' + body + toggle;
+applyAdsCollapse();
+}
+
+function applyAdsCollapse() {
+var chips = document.querySelectorAll("#ads-strip .ads-chip");
+var btn = document.getElementById("ads-toggle");
+if (!btn) {
+chips.forEach(function (c) { c.hidden = false; });
+return;
+}
+var expanded = btn.getAttribute("aria-expanded") === "true";
+var total = Number(btn.getAttribute("data-total"));
+chips.forEach(function (c, i) { c.hidden = !expanded && i >= 10; });
+btn.textContent = expanded ? t("adsShowLess") : t("adsShowAll").replace("{n}", total);
+}
+
+function getAdsCompanies(m, mk) {
+var names = [];
+var seen = {};
+records().forEach(function (r) {
+if (r.month !== m || r.channel !== "ads" || !matchesMarket(r, mk) || !matchesYear(r)) return;
+(r.companies || []).forEach(function (c) {
+var k = String(c).trim();
+if (k && !seen[k.toLowerCase()]) { seen[k.toLowerCase()] = true; names.push(k); }
+});
+});
+return names;
+}
+
+function prMediaHtml() {
+return "";
+}
+
+function renderPrStrip() {
+var strip = $("pr-strip");
+if (!strip) return;
+var m = getMonthFilter(), mk = getMarketFilter();
+var vs = renderPressSummary(m, mk);
+var n = vs.length;
+var mkName = mk === "ALL" ? (lang === "en" ? "All markets" : lang === "pt" ? "Todos os mercados" : "Todos los mercados") : (COUNTRIES.filter(function (c) { return c.id === mk; })[0] || { name: {} }).name[lang];
+var ctx = MONTHS[lang][m] + " " + getYearFilter() + " · " + mkName + " · " + t("prStripCtx");
+var countTxt = n === 1 ? t("prCountOne") : t("prCountMany").replace("{n}", n);
+var body = n ? '<ul class="pr-chips">' + vs.map(function (v) {
+var name = escapeHtml(v.medio);
+var inner = v.link
+? '<a href="' + escapeHtml(v.link) + '" target="_blank" rel="noopener noreferrer">' + name + '<span class="ext" aria-hidden="true">↗</span></a>'
+: name;
+return '<li class="pr-chip">' + inner + '</li>';
+}).join("") + '</ul>' : '<p class="pr-empty"><span aria-hidden="true">○</span>' + t("prEmpty") + '</p>';
+var toggle = n > 10 ? '<button type="button" class="pr-toggle" id="pr-toggle" aria-expanded="false" data-total="' + n + '">' + t("prShowAll").replace("{n}", n) + '</button>' : "";
+strip.innerHTML = '<div class="pr-strip-head">' +
+'<div><h3 class="pr-strip-title">' + t("prStripTitle") + '</h3>' +
+'<p class="pr-strip-ctx">' + ctx + '</p></div>' +
+'<span class="pr-strip-count">' + countTxt + '</span>' +
+'</div>' + body + toggle;
+applyPrCollapse();
+}
+
+function applyPrCollapse() {
+var chips = document.querySelectorAll("#pr-strip .pr-chip");
+var btn = document.getElementById("pr-toggle");
+if (!btn) {
+chips.forEach(function (c) { c.hidden = false; });
+return;
+}
+var expanded = btn.getAttribute("aria-expanded") === "true";
+var total = Number(btn.getAttribute("data-total"));
+chips.forEach(function (c, i) { c.hidden = !expanded && i >= 10; });
+btn.textContent = expanded ? t("prShowLess") : t("prShowAll").replace("{n}", total);
+}
+
+function draw12() {
+var mk = getMarketFilter();
+var eng = engagementByMonth(mk);
+var labels = MONTHS[lang].map(function (n) { return n.slice(0, 3); });
+var W = 760, H = 240, pad = 36;
+var maxV = 1;
+for (var i = 0; i < 12; i++) maxV = Math.max(maxV, eng[i] || 0);
+var step = (W - pad * 2) / 12;
+var out = "", pts = [];
+for (var j = 0; j < 12; j++) {
+var cx = pad + j * step + step / 2;
+if (eng[j] != null) {
+var py = H - pad - (eng[j] / maxV) * (H - pad * 2);
+pts.push([cx, py]);
+out += '<circle cx="' + cx + '" cy="' + py + '" r="5" fill="#E60027"><title>' + eng[j] + '</title></circle>';
+}
+out += '<text x="' + cx + '" y="' + (H - 12) + '" text-anchor="middle">' + labels[j] + '</text>';
+}
+var line = pts.length > 1 ? '<polyline fill="none" stroke="#E60027" stroke-width="2.5" points="' + pts.map(function (p) { return p.join(","); }).join(" ") + '"/>' : "";
+$("chart12-title").textContent = "Engagement — 12 months " + getYearFilter();
+$("chart-12m").innerHTML = '<svg class="bar-svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Engagement 12 meses">' +
+'<line class="grid" x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - pad) + '" y2="' + (H - pad) + '"/>' + line + out + '</svg>';
+}
+
+
+function renderHistory() {
+var list = records().filter(matchesYear).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+var body = $("history-body");
+if (!list.length) { body.innerHTML = '<tr><td colspan="7" class="muted text-center">—</td></tr>'; return; }
+body.innerHTML = list.map(function (r) {
+var ch = findChannel(r.channel);
+var co = COUNTRIES.filter(function (c) { return c.id === r.country; })[0];
+var vals = (ch ? ch.fields : Object.keys(r.values || {})).filter(function (k) { return k !== "mql"; }).map(function (k) {
+var v = r.values ? r.values[k] : null;
+if (v == null) return null;
+var meta = FIELD_META[k];
+var lbl = meta ? meta.label[lang] : k;
+var valStr = meta && meta.type === "brl" ? fmtBrl(v) : fmtNum(v);
+return lbl + ": " + valStr;
+}).filter(Boolean).join(" · ");
+var mqlV = r.values && r.values.mql;
+if (mqlV != null && Number(mqlV) > 0) {
+vals = (vals ? vals + " · " : "") + t("mqlSummary").replace("{n}", fmtNum(mqlV));
+}
+if (r.channel === "pr") {
+var nM = getVehicles(r.year, r.month, r.country).length;
+vals = (vals ? vals + " · " : "") + t("histMedios").replace("{n}", nM);
+}
+if (r.channel === "ads" && r.companies && r.companies.length) {
+vals = (vals ? vals + " · " : "") + t("histCompanies").replace("{n}", r.companies.length);
+}
+
+return '<tr>' +
+'<td class="nowrap">' + r.date + '</td>' +
+'<td>' + MONTHS[lang][r.month] + ' ' + r.year + '</td>' +
+'<td>' + (co ? co.name[lang] : r.country) + '</td>' +
+'<td class="nowrap"><strong>' + (ch ? ch.name[lang] : r.channel) + '</strong></td>' +
+'<td class="text-xs">' + (vals || "—") + '</td>' +
+'<td>' + escapeHtml(r.owner || "—") + '</td>' +
+'<td class="row gap-1 nowrap">' +
+'<button class="btn" data-variant="ghost" data-size="sm" data-edit="' + r.id + '">' + (lang === "en" ? "Edit" : lang === "pt" ? "Editar" : "Editar") + '</button>' +
+'<button class="btn" data-variant="destructive" data-size="sm" data-del="' + r.id + '">' + (lang === "en" ? "Delete" : lang === "pt" ? "Excluir" : "Eliminar") + '</button>' +
+'</td>' +
+'</tr>';
+}).join("");
+}
+
+function escapeHtml(s) { return String(s || "").replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+function renderValueFields() {
+var ch = findChannel($("e-channel").value) || CHANNELS[0];
+var ordered = ch.fields.filter(function (f) { return f !== "mql"; }).concat(ch.fields.indexOf("mql") >= 0 ? ["mql"] : []);
+$("e-values").innerHTML = ordered.map(function (f) {
+var meta = FIELD_META[f];
+if (f === "mql") {
+return '<div class="field mql-field">' +
+'<label class="text-sm font-medium" for="v-mql">' + meta.label[lang] + '<span class="mql-badge">MQL</span></label>' +
+'<input class="input" type="number" min="0" step="1" inputmode="numeric" id="v-mql" data-field="mql" placeholder="0" aria-describedby="v-mql-legend v-mql-err">' +
+'<span class="field-legend" id="v-mql-legend">' + I18N[lang].mqlLegend + '</span>' +
+'<span class="field-error" id="v-mql-err" role="alert">' + I18N[lang].mqlInvalid + '</span>' +
+'</div>';
+}
+var legend = meta.legend && typeof meta.legend === "object" ? '<span class="field-legend">' + meta.legend[lang] + '</span>' : "";
+return '<div class="field">' +
+'<label class="text-sm font-medium" for="v-' + f + '">' + meta.label[lang] + '</label>' +
+'<input class="input" type="number" min="0" step="1" inputmode="numeric" id="v-' + f + '" data-field="' + f + '" placeholder="0">' + legend +
+'</div>';
+}).join("");
+}
+
+
+var I18N = {
+es: {
+yearLabel: "Año", yearHint: "Año de referencia de todos los indicadores.", fYear: "Año", yearRequired: "Selecciona el año.",
+eyebrow: "Marketing Latam", title: "Panel de Resultados de Marketing", subtitle: "Seguimiento mensual de campañas, canales y mercados de América del Sur.",
+filtersTitle: "Filtros globales", filtersSub: "Todos los indicadores se recalculan con estos filtros.", monthRef: "Mes de referencia", monthHint: "Selecciona el mes que quieres analizar.", market: "Mercado", marketHint: "Filtra todos los indicadores por país.", lastUpdate: "Última actualización", lastUpdateNote: "Se actualiza al guardar cambios.",
+engagementLabel: "Personas que interactúan con la marca", engagementNote: "ENGAGEMENT = pageviews del sitio + aperturas de e-mail + clics en Anuncios + 1% del alcance de PR + visitantes de Eventos del mes. El 1% del alcance de PR es una fracción estimada, no una medición directa.",
+engPeriod: "{m} {y} — solo este mes", engPeriodMarket: "{m} {y} — solo este mes · {c}",
+adsStripTitle: "Principales empresas que interactuaron con la campaña de Anuncios", adsStripCtx: "Campaña de Anuncios", adsCompaniesNone: "Sin empresas registradas para este mes.", adsShowAll: "Ver todas ({n})", adsShowLess: "Ver menos", adsCountOne: "1 empresa", adsCountMany: "{n} empresas",
+adsBlockTitle: "Empresas que interactuaron con la campaña", adsBlockNote: "Esta lista reemplaza las empresas guardadas del mes; los valores numéricos se suman al registro existente.", btnAddCompany: "Añadir empresa", companyLabel: "Empresa", companyPh: "Ej.: Codelco", removeCompany: "Eliminar empresa", summaryAdsComp: "{n} empresas en Anuncios", summaryAdsCompOne: "1 empresa en Anuncios", histCompanies: "Empresas: {n}",
+interviews: "Interviews", interviewsSub: "Entrevistas publicadas en el mes.", prValue: "PR media value — month", prValueSub: "Valor equivalente en medios del mes.",
+chart12Sub: "Personas comprometidas por mes del año de referencia.", notPlotted: "Months without entries are not plotted", yearAccum: "Acumulado del año", yearAccumNote: "Suma enero–diciembre del año seleccionado (no del mes). Months without entries are not plotted",
+summaryTitleBase: "Resumen del mes", summaryPeriod: " — {p}", summarySub: "Indicadores clave del mes y mercado seleccionados. Un guion indica dato no reportado.",
+channelTitle: "Por canal — Resultados por canal", channelSub: "Métricas específicas por canal para el mes y mercado seleccionados.",
+entryTitle: "Carga de datos / Data entry", entrySub: "Si ya existe un registro para el mes, mercado y canal, los valores se suman y la página avisa.", fMonth: "Mes", fCountry: "País", fCountryHint: "Mercado del registro.", fChannel: "Canal", fChannelHint: "Elige el canal a registrar.", fOwner: "Responsable", required: "Obligatorio",
+btnSave: "Guardar registro", btnClear: "Limpiar", btnExport: "Exportar JSON", btnImport: "Importar JSON", btnRestore: "Restaurar datos originales",
+histTitle: "Historial de registros", histSub: "Todos los registros guardados en este navegador.", colDate: "Fecha", colMonth: "Mes", colMarket: "Mercado", colChannel: "Canal", colValues: "Valores", colOwner: "Responsable", colActions: "Acciones",
+confirmTitle: "¿Eliminar registro?", confirmText: "Esta acción no se puede deshacer.", cancel: "Cancelar", delete: "Eliminar",
+footer1: "Hitachi HMMS · Panel de Marketing Latam. La identidad visual se inspira en el sitio corporativo de Hitachi.", footer2: "Datos guardados en el navegador de este equipo.",
+prStripTitle: "Medios de PR — dónde salieron las materias", prStripCtx: "Materias de PR del mes", prEmpty: "Sin medios registrados para este mes.", prCountOne: "1 medio", prCountMany: "{n} medios", prShowAll: "Ver todas ({n})", prShowLess: "Ver menos",
+pressBlockTitle: "Medios donde salió la materia", pressBlockNote: "Esta lista reemplaza los medios guardados del mes; los valores numéricos se suman al registro existente.", btnAddPress: "Añadir medio", pressMedio: "Medio", pressMedioPh: "Ej.: El Mercurio", pressLink: "Enlace de la materia", pressRemove: "Eliminar medio", pressListTitle: "Medios del mes", pressCount: "{n} medios registrados", pressCountOne: "1 medio registrado", pressEmpty: "Sin medios registrados para este mes.", summaryMedios: "{n} medios en PR", histMedios: "Medios: {n}",
+prYearLabel: "Valor de medios de PR acumulado", prYearCtx: "con base en {n} meses reportados", prYearCtxOne: "con base en 1 mes reportado", prYearNote: "Valor estimado de medios ganados — suma del valor de medios de PR reportado, no es gasto real.",
+mqlLabel: "MQL", mqlLegend: "Empresas con potencial que contactaron para una posible reunión", engagementNote: "ENGAGEMENT = pageviews del sitio + aperturas de e-mail + clics en Anuncios + 1% del alcance de PR + visitantes de Eventos del mes. El 1% del alcance de PR es una fracción estimada, no una medición directa.", mqlTotal: "MQL — total del mes", mqlChannels: "{n} canales con MQL", mqlChannelsOne: "1 canal con MQL", mqlSummary: "MQL: {n}", mqlTip: "El MQL se puede registrar en todos los canales — es el último campo del bloque del canal.", mqlInvalid: "Introduce un número entero positivo, sin letras ni negativos."
+},
+pt: {
+yearLabel: "Ano", yearHint: "Ano de referência de todos os indicadores.", fYear: "Ano", yearRequired: "Selecione o ano.",
+eyebrow: "Marketing Latam", title: "Painel de Resultados de Marketing", subtitle: "Acompanhamento mensal de campanhas, canais e mercados da América do Sul.",
+filtersTitle: "Filtros globais", filtersSub: "Todos os indicadores são recalculados com estes filtros.", monthRef: "Mês de referência", monthHint: "Selecione o mês que deseja analisar.", market: "Mercado", marketHint: "Filtra todos os indicadores por país.", lastUpdate: "Última atualização", lastUpdateNote: "Atualizado ao salvar alterações.",
+adsStripTitle: "Principais empresas que interagiram com a campanha de Anúncios", adsStripCtx: "Campanha de Anúncios", adsCompaniesNone: "Nenhuma empresa registrada para este mês.", adsShowAll: "Ver todas ({n})", adsShowLess: "Ver menos", adsCountOne: "1 empresa", adsCountMany: "{n} empresas",
+adsBlockTitle: "Empresas que interagiram com a campanha", adsBlockNote: "Esta lista substitui as empresas salvas do mês; os valores numéricos são somados ao registro existente.", btnAddCompany: "Adicionar empresa", companyLabel: "Empresa", companyPh: "Ex.: Vale", removeCompany: "Remover empresa", summaryAdsComp: "{n} empresas em Anúncios", summaryAdsCompOne: "1 empresa em Anúncios", histCompanies: "Empresas: {n}",
+engagementLabel: "Pessoas que interagem com a marca", engagementNote: "ENGAGEMENT = pageviews do site + aberturas de e-mail + cliques em Anúncios + 1% do alcance de PR + visitantes de Eventos do mês. O 1% do alcance de PR é uma fração estimada, não uma medição direta.",
+engPeriod: "{m} {y} — somente este mês", engPeriodMarket: "{m} {y} — somente este mês · {c}",
+interviews: "Interviews", interviewsSub: "Entrevistas publicadas no mês.", prValue: "PR media value — month", prValueSub: "Valor equivalente em mídia do mês.",
+chart12Sub: "Pessoas engajadas por mês do ano de referência.", notPlotted: "Months without entries are not plotted", yearAccum: "Acumulado do ano", yearAccumNote: "Soma janeiro–dezembro do ano de referência (não do mês). Months without entries are not plotted",
+summaryTitleBase: "Resumo do mês", summaryPeriod: " — {p}", summarySub: "Indicadores-chave do mês e mercado selecionados. Um traço indica dado não reportado.",
+channelTitle: "Por canal — Resultados por canal", channelSub: "Métricas específicas por canal para o mês e mercado selecionados.",
+entryTitle: "Carga de dados / Data entry", entrySub: "Se já existir um registro para o mês, mercado e canal, os valores são somados e a página avisa.", fMonth: "Mês", fCountry: "País", fCountryHint: "Mercado do registro.", fChannel: "Canal", fChannelHint: "Escolha o canal a registrar.", fOwner: "Responsável", required: "Obrigatório",
+btnSave: "Salvar registro", btnClear: "Limpar", btnExport: "Exportar JSON", btnImport: "Importar JSON", btnRestore: "Restaurar dados originais",
+histTitle: "Histórico de registros", histSub: "Todos os registros salvos neste navegador.", colDate: "Data", colMonth: "Mês", colMarket: "Mercado", colChannel: "Canal", colValues: "Valores", colOwner: "Responsável", colActions: "Ações",
+confirmTitle: "Excluir registro?", confirmText: "Esta ação não pode ser desfeita.", cancel: "Cancelar", delete: "Excluir",
+footer1: "Hitachi HMMS · Painel de Marketing Latam. A identidade visual se inspira no site corporativo da Hitachi.", footer2: "Dados salvos no navegador deste equipamento.",
+prStripTitle: "Veículos de PR — onde as matérias saíram", prStripCtx: "Matérias de PR do mês", prEmpty: "Nenhum veículo registrado para este mês.", prCountOne: "1 veículo", prCountMany: "{n} veículos", prShowAll: "Ver todas ({n})", prShowLess: "Ver menos",
+pressBlockTitle: "Veículos onde a matéria saiu", pressBlockNote: "Esta lista substitui os veículos salvos do mês; os valores numéricos são somados ao registro existente.", btnAddPress: "Adicionar veículo", pressMedio: "Veículo", pressMedioPh: "Ex.: Folha de S.Paulo", pressLink: "Link da matéria", pressRemove: "Remover veículo", pressListTitle: "Veículos do mês", pressCount: "{n} veículos registrados", pressCountOne: "1 veículo registrado", pressEmpty: "Nenhum veículo registrado para este mês.", summaryMedios: "{n} veículos em PR", histMedios: "Veículos: {n}",
+prYearLabel: "Valor de mídia de PR acumulado", prYearCtx: "com base em {n} meses reportados", prYearCtxOne: "com base em 1 mês reportado", prYearNote: "Valor estimado de mídia espontânea — soma do valor de mídia de PR reportado, não é investimento realizado.",
+mqlLabel: "MQL", mqlLegend: "Empresas com potencial que entraram em contato para uma possível reunião", mqlTotal: "MQL — total do mês", mqlChannels: "{n} canais com MQL", mqlChannelsOne: "1 canal com MQL", mqlSummary: "MQL: {n}", mqlTip: "O MQL pode ser lançado em todos os canais — é o último campo do bloco do canal.", mqlInvalid: "Digite um número inteiro positivo, sem letras nem negativos."
+},
+en: {
+yearLabel: "Year", yearHint: "Reference year for all indicators.", fYear: "Year", yearRequired: "Select the year.",
+eyebrow: "Marketing Latam", title: "Marketing Results Dashboard", subtitle: "Monthly tracking of campaigns, channels and South American markets.",
+filtersTitle: "Global filters", filtersSub: "All indicators recalculate with these filters.", monthRef: "Reference month", monthHint: "Select the month you want to analyze.", market: "Market", marketHint: "Filters all indicators by country.", lastUpdate: "Last update", lastUpdateNote: "Updated when changes are saved.",
+adsStripTitle: "Main companies that interacted with the Ads campaign", adsStripCtx: "Ads campaign", adsCompaniesNone: "No companies registered for this month.", adsShowAll: "Show all ({n})", adsShowLess: "Show less", adsCountOne: "1 company", adsCountMany: "{n} companies",
+adsBlockTitle: "Companies that interacted with the Ads campaign", adsBlockNote: "This list replaces the saved companies for the month; numeric values are added to the existing record.", btnAddCompany: "Add company", companyLabel: "Company", companyPh: "e.g. Acme Corp", removeCompany: "Remove company", summaryAdsComp: "{n} companies in Ads", summaryAdsCompOne: "1 company in Ads", histCompanies: "Companies: {n}",
+engagementLabel: "People who interacted with the company", engagementNote: "ENGAGEMENT = site pageviews + email opens + ad clicks + 1% of PR reach + event stand visitors. The 1% of PR reach is an estimated fraction, not a direct measurement.",
+engPeriod: "{m} {y} — this month only", engPeriodMarket: "{m} {y} — this month only · {c}",
+interviews: "Interviews", interviewsSub: "Interviews published in the month.", prValue: "PR media value — month", prValueSub: "Equivalent media value for the month.",
+chart12Sub: "People engaged per month of the reference year.", notPlotted: "Months without entries are not plotted", yearAccum: "Year to date", yearAccumNote: "Sum January–December of the selected year (not the month). Months without entries are not plotted",
+summaryTitleBase: "Monthly summary", summaryPeriod: " — {p}", summarySub: "Key indicators for the selected month and market. A dash means data not reported.",
+channelTitle: "By channel — Results by channel", channelSub: "Channel-specific metrics for the selected month and market.",
+entryTitle: "Data entry", entrySub: "If a record already exists for the month, market and channel, values are added together and the page warns you.", fMonth: "Month", fCountry: "Country", fCountryHint: "Market of the record.", fChannel: "Channel", fChannelHint: "Choose the channel to record.", fOwner: "Owner", required: "Required",
+btnSave: "Save record", btnClear: "Clear", btnExport: "Export JSON", btnImport: "Import JSON", btnRestore: "Restore original data",
+histTitle: "Record history", histSub: "All records saved in this browser.", colDate: "Date", colMonth: "Month", colMarket: "Market", colChannel: "Channel", colValues: "Values", colOwner: "Owner", colActions: "Actions",
+confirmTitle: "Delete record?", confirmText: "This action cannot be undone.", cancel: "Cancel", delete: "Delete",
+footer1: "Hitachi HMMS · Latam Marketing Dashboard. The visual identity is inspired by Hitachi's corporate website.", footer2: "Data saved in this device's browser.",
+prStripTitle: "PR media outlets — where the stories ran", prStripCtx: "PR stories of the month", prEmpty: "No outlets registered for this month.", prCountOne: "1 outlet", prCountMany: "{n} outlets", prShowAll: "Show all ({n})", prShowLess: "Show less",
+pressBlockTitle: "Media outlets where the story ran", pressBlockNote: "This list replaces the outlets saved for the month; numeric values are added to the existing record.", btnAddPress: "Add outlet", pressMedio: "Outlet", pressMedioPh: "e.g.: The New York Times", pressLink: "Story link", pressRemove: "Remove outlet", pressListTitle: "Outlets for the month", pressCount: "{n} outlets recorded", pressCountOne: "1 outlet recorded", pressEmpty: "No outlets recorded for this month.", summaryMedios: "{n} outlets in PR", histMedios: "Outlets: {n}",
+prYearLabel: "PR media value — year to date", prYearCtx: "based on {n} months reported", prYearCtxOne: "based on 1 month reported", prYearNote: "Estimated earned media value — sum of PR media value reported, not actual spend.",
+mqlLabel: "MQL", mqlLegend: "Companies with potential that contacted us for a possible meeting", mqlTotal: "MQL — total of the month", mqlChannels: "{n} channels with MQL", mqlChannelsOne: "1 channel with MQL", mqlSummary: "MQL: {n}", mqlTip: "MQL can be entered for every channel — it is the last field of the channel block.", mqlInvalid: "Enter a whole positive number, without letters or negatives."
+}
+};
+
+function applyLang() {
+var dict = I18N[lang];
+var tip = $("mql-tip");
+if (tip) tip.querySelector("[data-i18n]").textContent = dict.mqlTip;
+var pressDraftBtn = $("btn-add-press");
+if (pressDraftBtn) pressDraftBtn.textContent = dict.btnAddPress;
+var adsDraftBtn = $("btn-add-company");
+if (adsDraftBtn) adsDraftBtn.textContent = dict.btnAddCompany;
+if (dict.prYearLabel) document.querySelectorAll('[data-i18n="prYearLabel"]').forEach(function (el) { el.textContent = dict.prYearLabel; });
+document.documentElement.lang = LOCALES[lang];
+$("btn-print").querySelector("[data-i18n]").textContent = PRINT_LABELS[lang].print;
+document.querySelectorAll("[data-i18n]").forEach(function (el) {
+var k = el.getAttribute("data-i18n");
+if (dict[k]) el.textContent = dict[k];
+});
+document.querySelectorAll(".lang-switch button").forEach(function (b) {
+b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === lang));
+});
+renderFilters();
+renderValueFields();
+renderAll();
+}
+
+function renderAll() {
+renderKpis(); renderSummary(); renderSummaryTitle(); renderChannels(); draw12(); renderHistory(); renderPrintMeta();
+}
+
+function renderSummaryTitle() {
+var el = $("summary-period");
+if (!el) return;
+var p = MONTHS[lang][getMonthFilter()] + " " + getYearFilter();
+el.textContent = I18N[lang].summaryPeriod.replace("{p}", p);
+}
+
+function renderPrintMeta() {
+var p = PRINT_LABELS[lang];
+var mk = getMarketFilter();
+var mkName = mk === "ALL" ? p.all : (COUNTRIES.filter(function (c) { return c.id === mk; })[0] || { name: {} }).name[lang];
+var month = MONTHS[lang][getMonthFilter()] + " " + getYearFilter();
+var today = new Date().toLocaleDateString(LOCALES[lang]);
+$("print-meta").textContent = month + " · " + mkName + " — " + p.issued + " " + today;
+$("print-filters").textContent = month + " · " + mkName;
+var lu = $("last-update-card");
+if (lu) lu.style.display = "";
+}
+
+function resetForm() {
+editingId = null;
+$("entry-form").reset();
+$("e-year").value = "";
+$("e-year").classList.remove("is-invalid");
+$("e-year-err").classList.remove("show");
+$("e-month").value = $("filter-month").value;
+$("e-country").value = getMarketFilter() === "ALL" ? "" : getMarketFilter();
+renderValueFields();
+updatePressVisibility();
+updateAdsVisibility();
+}
+
+$("filter-year").addEventListener("change", function () {
+YEAR = getYearFilter();
+YEAR_PREF.set(YEAR);
+renderAll();
+});
+$("filter-month").addEventListener("change", renderAll);
+$("filter-market").addEventListener("change", renderAll);
+$("e-channel").addEventListener("change", function () { renderValueFields(); updatePressVisibility(); updateAdsVisibility(); });
+$("e-values").addEventListener("input", function (e) {
+if (e.target.id !== "v-mql") return;
+var bad = /[^0-9]/.test(e.target.value) || /^-/.test(e.target.value);
+e.target.classList.toggle("is-invalid", bad);
+$("v-mql-err").classList.toggle("show", bad);
+});
+$("e-month").addEventListener("change", function () {
+if ($("e-channel").value === "pr") loadPressDraft(Number($("e-month").value), $("e-country").value);
+if ($("e-channel").value === "ads") loadAdsDraft(Number($("e-month").value), $("e-country").value);
+});
+$("e-year").addEventListener("change", function () {
+$("e-year-err").classList.remove("show");
+$("e-year").classList.remove("is-invalid");
+if ($("e-channel").value === "pr") loadPressDraft(Number($("e-month").value), $("e-country").value);
+if ($("e-channel").value === "ads") loadAdsDraft(Number($("e-month").value), $("e-country").value);
+});
+$("e-country").addEventListener("change", function () {
+if ($("e-channel").value === "pr") loadPressDraft(Number($("e-month").value), $("e-country").value);
+if ($("e-channel").value === "ads") loadAdsDraft(Number($("e-month").value), $("e-country").value);
+});
+$("btn-add-press").addEventListener("click", function () {
+syncPressDraftFromInputs();
+pressDraft.push({ id: "p" + (++pressSeq) + "_" + Date.now(), medio: "", link: "" });
+renderPressRows();
+var rows = document.querySelectorAll("#press-rows [data-pm='medio']");
+if (rows.length) rows[rows.length - 1].focus();
+});
+$("press-rows").addEventListener("click", function (e) {
+var id = e.target.getAttribute("data-pm-remove");
+if (!id) return;
+syncPressDraftFromInputs();
+pressDraft = pressDraft.filter(function (v) { return v.id !== id; });
+renderPressRows();
+});
+$("press-rows").addEventListener("keydown", function (e) {
+if (e.key === "Enter" && e.target.getAttribute("data-pm") === "link") e.preventDefault();
+});
+$("btn-add-company").addEventListener("click", function () {
+syncAdsDraftFromInputs();
+adsDraft.push({ id: "c" + (++adsSeq) + "_" + Date.now(), name: "" });
+renderAdsFormRows();
+var rows = document.querySelectorAll("#ads-form-rows [data-cn='name']");
+if (rows.length) rows[rows.length - 1].focus();
+});
+$("ads-form-rows").addEventListener("click", function (e) {
+var id = e.target.getAttribute("data-cn-remove");
+if (!id) return;
+syncAdsDraftFromInputs();
+adsDraft = adsDraft.filter(function (v) { return v.id !== id; });
+renderAdsFormRows();
+});
+document.querySelectorAll(".lang-switch button").forEach(function (b) {
+b.addEventListener("click", function () { lang = b.getAttribute("data-lang"); applyLang(); });
+});
+$("pr-strip").addEventListener("click", function (e) {
+if (!e.target.classList || !e.target.classList.contains("pr-toggle")) return;
+var btn = e.target;
+btn.setAttribute("aria-expanded", String(btn.getAttribute("aria-expanded") !== "true"));
+applyPrCollapse();
+});
+$("ads-strip").addEventListener("click", function (e) {
+if (!e.target.classList || !e.target.classList.contains("ads-companies-toggle")) return;
+var btn = e.target;
+btn.setAttribute("aria-expanded", String(btn.getAttribute("aria-expanded") !== "true"));
+applyAdsCollapse();
+});
+$("btn-print").addEventListener("click", function () {
+renderPrintMeta();
+window.print();
+});
+
+$("entry-form").addEventListener("submit", function (e) {
+e.preventDefault();
+var yearSel = $("e-year");
+if (!yearSel.value) {
+yearSel.classList.add("is-invalid");
+$("e-year-err").classList.add("show");
+yearSel.focus();
+return;
+}
+var recYear = Number(yearSel.value);
+var mqlInp = $("v-mql");
+if (mqlInp && (/[^0-9]/.test(mqlInp.value.trim()) || /^-/.test(mqlInp.value.trim()))) {
+mqlInp.classList.add("is-invalid");
+$("v-mql-err").classList.add("show");
+mqlInp.focus();
+return;
+}
+var month = Number($("e-month").value);
+var isPr = $("e-channel").value === "pr";
+var isAds = $("e-channel").value === "ads";
+if (isPr) syncPressDraftFromInputs();
+if (isAds) syncAdsDraftFromInputs();
+var country = $("e-country").value;
+var channel = $("e-channel").value;
+var owner = $("e-owner").value.trim();
+var values = {};
+var compList = isAds ? cleanCompanies(adsDraft) : [];
+document.querySelectorAll("#e-values input[data-field]").forEach(function (inp) {
+var f = inp.getAttribute("data-field");
+var raw = inp.value.trim();
+if (raw !== "") {
+var num = Math.max(0, Math.round(Number(raw)) || 0);
+values[f] = num;
+}
+});
+var list = records();
+var existing = list.filter(function (r) { return r.year === recYear && r.month === month && r.country === country && r.channel === channel && r.id !== editingId; })[0];
+var today = new Date().toISOString().slice(0, 10);
+if (editingId) {
+list = list.map(function (r) {
+return r.id === editingId ? sanitize({ id: r.id, date: today, year: recYear, month: month, country: country, channel: channel, owner: owner, values: values, companies: compList }) : r;
+});
+} else if (existing) {
+existing.values = existing.values || {};
+Object.keys(values).forEach(function (k) {
+existing.values[k] = (existing.values[k] || 0) + values[k];
+});
+if (owner) existing.owner = owner;
+if (isAds) existing.companies = compList;
+existing.date = today;
+window.skipUI.toast(lang === "en" ? "Existing record found: values were added together." : lang === "pt" ? "Registro existente: os valores foram somados." : "Ya existía un registro: los valores se sumaron.", { type: "success" });
+} else {
+list.push(sanitize({ id: "r" + Date.now(), date: today, year: recYear, month: month, country: country, channel: channel, owner: owner, values: values, companies: compList }));
+}
+saveRecords(list);
+if (isPr) {
+setVehicles(recYear, month, country, cleanVehicles(pressDraft.map(function (v) {
+return { id: v.id, medio: v.medio.trim(), link: v.link.trim() };
+})));
+}
+resetForm();
+renderAll();
+window.skipUI.toast(lang === "en" ? "Record saved." : lang === "pt" ? "Registro salvo." : "Registro guardado.", { type: "success" });
+});
+
+$("btn-clear").addEventListener("click", function () {
+resetForm();
+window.skipUI.toast(lang === "en" ? "Form cleared." : lang === "pt" ? "Formulário limpo." : "Formulario limpiado.");
+});
+
+$("btn-export").addEventListener("click", function () {
+var blob = new Blob([JSON.stringify({ records: records(), vehiculos: VEHICLES.get() || {} }, null, 2)], { type: "application/json" });
+var a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "hitachi-hmms-registros.json";
+a.click();
+window.skipUI.toast(lang === "en" ? "JSON exported." : lang === "pt" ? "JSON exportado." : "JSON exportado.", { type: "success" });
+});
+
+$("btn-import").addEventListener("click", function () { $("import-file").click(); });
+$("import-file").addEventListener("change", function (e) {
+var f = e.target.files[0];
+if (!f) return;
+var reader = new FileReader();
+reader.onload = function () {
+try {
+var data = JSON.parse(reader.result);
+var arr = Array.isArray(data) ? data : (data.records || []);
+var clean = arr.map(sanitize).filter(Boolean);
+saveRecords(clean);
+if (data && data.vehiculos && typeof data.vehiculos === "object") {
+var vmap = {};
+Object.keys(data.vehiculos).forEach(function (k) {
+var list = cleanVehicles(data.vehiculos[k]);
+if (list.length) vmap[k] = list;
+});
+VEHICLES.set(vmap);
+}
+renderAll();
+window.skipUI.toast(lang === "en" ? "Import complete." : lang === "pt" ? "Importação concluída." : "Importación completada.", { type: "success" });
+} catch (err) {
+window.skipUI.toast(lang === "en" ? "Invalid file." : lang === "pt" ? "Arquivo inválido." : "Archivo no válido.", { type: "error" });
+}
+};
+reader.readAsText(f);
+});
+
+$("btn-restore").addEventListener("click", function () {
+saveRecords(SEED);
+VEHICLES.set({});
+YEAR = 2026;
+YEAR_PREF.set(2026);
+$("filter-year").value = "2026";
+resetForm();
+renderAll();
+window.skipUI.toast(lang === "en" ? "Original data restored." : lang === "pt" ? "Dados originais restaurados." : "Datos originales restaurados.", { type: "success" });
+});
+
+
+$("history-body").addEventListener("click", function (e) {
+var edit = e.target.getAttribute("data-edit");
+var del = e.target.getAttribute("data-del");
+if (edit) {
+var r = records().filter(function (x) { return x.id === edit; })[0];
+if (!r) return;
+editingId = edit;
+$("e-year").value = r.year;
+$("e-month").value = r.month;
+$("e-country").value = r.country;
+$("e-channel").value = r.channel;
+$("e-owner").value = r.owner;
+renderValueFields();
+Object.keys(r.values).forEach(function (k) {
+var inp = document.querySelector('#e-values input[data-field="' + k + '"]');
+if (inp) inp.value = r.values[k];
+});
+updatePressVisibility();
+updateAdsVisibility();
+if (r.channel === "ads" && Array.isArray(r.companies)) {
+adsDraft = r.companies.map(function (c) { return { id: "c" + (++adsSeq) + "_" + Date.now(), name: c }; });
+renderAdsFormRows();
+}
+document.getElementById("entry-form").scrollIntoView({ behavior: "smooth" });
+}
+if (del) {
+pendingDelete = del;
+$("confirm-dialog").showModal();
+}
+});
+
+$("confirm-delete").addEventListener("click", function () {
+if (!pendingDelete) return;
+saveRecords(records().filter(function (r) { return r.id !== pendingDelete; }));
+pendingDelete = null;
+$("confirm-dialog").close();
+renderAll();
+window.skipUI.toast(lang === "en" ? "Record deleted." : lang === "pt" ? "Registro excluído." : "Registro eliminado.", { type: "success" });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+YEAR = Number(YEAR_PREF.get()) || 2026;
+applyLang();
+updatePressVisibility();
+updateAdsVisibility();
+});
+})();
+</script>
+</body>
+</html>
